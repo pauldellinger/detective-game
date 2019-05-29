@@ -2,7 +2,7 @@
 var canvas = document.getElementById("c");
 var ctx = canvas.getContext("2d");
 var dx = 5;
-var dy = 10;
+var dy = 5;
 var rightPressed = false;
 var leftPressed = false;
 var xbound = window.innerWidth;
@@ -17,6 +17,9 @@ var j;
 var pos = [];
 var obstacleCount = 10;
 var lives = 3;
+var step = 0;
+var carmenStatus= 0;
+
 
 
 var windowheights=[];
@@ -64,11 +67,22 @@ function resetObstacles(){
 }
 resetObstacles();
 
-
 function draw(){
+  //ctx.clearRect(0, 0, xbound, ybound);
   drawBackground();
-  //drawBackground();
+
+  if (step>4){
+    if (carmenStatus===2){
+      carmenStatus=0;
+    }
+    else{
+      carmenStatus ++;
+    }
+    step=0;
+  }
+  step++;
   drawCarmen();
+
 //Draw Square
 
   if(rightPressed && cx < 4*xbound/5-20) {
@@ -77,15 +91,42 @@ function draw(){
   else if(leftPressed && cx > xbound/5+2) {
     cx -= 7;
   }
+  /*
+  else if(upPressed && cy > 0) {
+    cy -= 7;
+  }
+  else if(upPressed && cy < ybound) {
+    cy += 7;
+  }
+  */
   drawObstacles();
   if (collisionDetection()){
     lives --;
+    var temp = dy;
+
     collide();
+
     cx = xbound/2;
 
   }
+  if (dy<12&&dy>4.9&&performance.now()<120000){
+    dy+=.001;
+  }
+  if (performance.now()>120000 && dy>0.1){
+    dy-=.1;
+  }
+
+
+  drawSpeed();
   requestAnimationFrame(draw);
-  }draw();
+}draw();
+function drawSpeed(){
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("Score: "+dy, xbound/2, 20);
+    ctx.fillText("Time: "+performance.now(), xbound/2-200, 20);
+
+}
 function collide(){
   ctx.globalAlpha=1;
   alpha = ctx.globalAlpha;
@@ -112,7 +153,6 @@ function collide(){
 
   }
 
-
   //cx = xbound/2;
 }
 function drawBackground(){
@@ -124,7 +164,7 @@ function drawBackground(){
   ctx.fillRect(0,0, xbound/5,ybound);
   ctx.fillRect(4*xbound/5,0, xbound,ybound);
 
-  var grd = ctx.createLinearGradient(0,1.5*ybound, 0, 0);
+  var grd = ctx.createLinearGradient(0,0, 0, 1.5*ybound);
   grd.addColorStop(0, "#3B67BF");
   grd.addColorStop(1, "transparent");
   ctx.fillStyle = grd;
@@ -135,9 +175,16 @@ function drawBackground(){
     if (windowheights[i]+80<0){
       windowheights[i] = ybound;
     }
+    if (i%5===0){
+      ctx.fillStyle = "#FFEE93";
+      ctx.globalAlpha = 0.6;
+      ctx.fillRect(windowpositions[i],windowheights[i], 50,80);
+    }
+    else{
     ctx.fillStyle = "#F6F7FB";
     ctx.globalAlpha = 0.6;
     ctx.fillRect(windowpositions[i],windowheights[i], 50,80);
+    }
     ctx.fillStyle = "#37375B";
     ctx.fillRect(windowpositions[i],windowheights[i]-10, 50,10);
     ctx.fillRect(windowpositions[i]-10,windowheights[i],10,80);
@@ -145,7 +192,6 @@ function drawBackground(){
     ctx.fillRect(windowpositions[i],windowheights[i]+80,50,10);
     ctx.globalAlpha = 1;
     windowheights[i]-=dy;
-
   }
 
 
@@ -158,17 +204,32 @@ function collisionDetection(){
   for (i =0; i<obstacleCount; i++){
     var x = pos[i];
     var y = heights[i];
-    if (cx<x+30 &&cx>x && cy<y+30 &&cy>y){
+    if (x<cx+25&&x+30>cx&&y<cy+50&&y+30>cy){
       return true;
     }
   }
 }
+
 function drawCarmen(){
-  ctx.beginPath();
-  ctx.fillStyle = "green";
-  ctx.fillRect(cx,cy,20,20);
-  ctx.closePath();
-}
+
+
+
+  var img = document.getElementById("isabella");
+
+  if (carmenStatus==0){
+    ctx.drawImage(img, 0,100,100,100, cx, cy, 80, 80);
+
+  }
+  else if(carmenStatus==1){
+    ctx.drawImage(img, 0,0,100,100, cx, cy, 80, 80);
+  }
+  else if(carmenStatus==2){
+    ctx.drawImage(img, 0,200,100,100, cx, cy, 80, 80);
+
+  }
+
+};
+
 function drawObstacles(){
   var i;
   for (i = 0; i < obstacleCount; i++) {
@@ -179,10 +240,14 @@ function drawObstacles(){
       pos[i] = random;
       heights[i] = ybound;
     }
+    /*
     ctx.beginPath();
     ctx.fillStyle = "red";
     ctx.fillRect(pos[i], heights[i], 30,30);
     ctx.closePath();
+    */
+    var img = document.getElementById("obstacle");
+    ctx.drawImage(img, pos[i],heights[i], 30, 30);
     heights[i]-=dy;
   }
 }
@@ -196,6 +261,14 @@ function keyDownHandler(e) {
     else if(e.key == "Left" || e.key == "ArrowLeft") {
         leftPressed = true;
     }
+    /*
+    else if(e.key == "Up" || e.key == "ArrowUp") {
+        upPressed = true;
+    }
+    else if(e.key == "Down" || e.key == "ArrowDown") {
+        downPressed = true;
+    }
+    */
 }
 
 function keyUpHandler(e) {
@@ -205,4 +278,12 @@ function keyUpHandler(e) {
     else if(e.key == "Left" || e.key == "ArrowLeft") {
         leftPressed = false;
     }
+    /*
+    else if(e.key == "Up" || e.key == "ArrowUp") {
+        upPressed = false;
+    }
+    else if(e.key == "Down" || e.key == "ArrowDown") {
+        downPressed = false;
+    }
+    */
 }

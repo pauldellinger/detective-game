@@ -2,13 +2,14 @@
 var canvas = document.getElementById("c");
 var ctx = canvas.getContext("2d");
 var dx = 5;
-var dy = 5;
+var dy = 11.5;
 var rightPressed = false;
 var leftPressed = false;
 var xbound = window.innerWidth;
 var ybound = window.innerHeight;
 var cx = xbound/2;
 var cy = ybound/4;
+
 var y2 = window.innerHeight;
 var y3 = ybound;
 var heights = [];
@@ -20,20 +21,21 @@ var lives = 3;
 var step = 0;
 var carmenStatus= 0;
 
-
+var endgame = false;
+var ky = ybound +200;
 
 var windowheights=[];
 var windowpositions=[];
 var windowheight = 0;
-var position = 20;
+var position = xbound/5/10;
 for (i=0;i<12; i++){
   if (i%3===0&&i!=0){
     windowheight+= ybound/4+20;
-    position = 20;
+    position = xbound/5/10;
   }
   windowheights[i] = windowheight;
   windowpositions[i] = position;
-  position+=80;
+  position+= 3*xbound/5/10;
 
 }
 var windowheight = 0;
@@ -84,7 +86,7 @@ function draw(){
   drawCarmen();
 
 //Draw Square
-
+  //drawKiller();
   if(rightPressed && cx < 4*xbound/5-20) {
     cx += 7;
   }
@@ -109,12 +111,32 @@ function draw(){
     cx = xbound/2;
 
   }
-  if (dy<12&&dy>4.9&&performance.now()<120000){
+
+  if (dy<12&&dy>4.9&&performance.now()<10000){
     dy+=.001;
   }
-  if (performance.now()>120000 && dy>0.1){
-    dy-=.1;
+
+  if (dy>12){
+    endgame = true;
+    if (drawKiller()){
+      ending_sequence();
+    }
   }
+
+  /*
+  if (performance.now()>10000 && dy>0.1){
+    dy-=.1;
+
+  }
+  if (dy<=.1){
+    endgame = true;
+  }
+  if (endgame){
+    dy = 0;
+
+    // /drawKiller();
+  }
+  */
 
 
   drawSpeed();
@@ -125,7 +147,19 @@ function drawSpeed(){
     ctx.fillStyle = "#0095DD";
     ctx.fillText("Score: "+dy, xbound/2, 20);
     ctx.fillText("Time: "+performance.now(), xbound/2-200, 20);
+    ctx.fillText("killer height: "+xbound/5, xbound/5, 20);
 
+}
+function drawKiller(){
+  kx = 3*xbound/5;
+  ctx.fillStyle = "green";
+  ctx.fillRect(kx,ky,50,50);
+  if (ky>ybound/4){
+    ky-=1;
+  }
+  if(kx<cx+25&&kx+30>cx&&ky<cy+50&&ky+30>cy){
+    return true;
+  }
 }
 function collide(){
   ctx.globalAlpha=1;
@@ -176,11 +210,19 @@ function drawBackground(){
       windowheights[i] = ybound;
     }
     if (i%5===0){
+      var img = document.getElementById("window_lit");
+      ctx.drawImage(img, windowpositions[i], windowheights[i], 80, 100);
+      /*
       ctx.fillStyle = "#FFEE93";
       ctx.globalAlpha = 0.6;
       ctx.fillRect(windowpositions[i],windowheights[i], 50,80);
+      */
     }
     else{
+    var img = document.getElementById("window_unlit");
+    ctx.drawImage(img, windowpositions[i], windowheights[i], 80, 100);
+
+    /*
     ctx.fillStyle = "#F6F7FB";
     ctx.globalAlpha = 0.6;
     ctx.fillRect(windowpositions[i],windowheights[i], 50,80);
@@ -191,6 +233,8 @@ function drawBackground(){
     ctx.fillRect(windowpositions[i]+50,windowheights[i],10,80);
     ctx.fillRect(windowpositions[i],windowheights[i]+80,50,10);
     ctx.globalAlpha = 1;
+    */
+  }
     windowheights[i]-=dy;
   }
 
@@ -199,6 +243,9 @@ function drawBackground(){
   ctx.closePath();
 
 }
+
+
+
 
 function collisionDetection(){
   for (i =0; i<obstacleCount; i++){
@@ -217,11 +264,11 @@ function drawCarmen(){
   var img = document.getElementById("isabella");
 
   if (carmenStatus==0){
-    ctx.drawImage(img, 0,100,100,100, cx, cy, 80, 80);
+    ctx.drawImage(img, 0,0,100,100, cx, cy, 80, 80);
 
   }
   else if(carmenStatus==1){
-    ctx.drawImage(img, 0,0,100,100, cx, cy, 80, 80);
+    ctx.drawImage(img, 0,100,100,100, cx, cy, 80, 80);
   }
   else if(carmenStatus==2){
     ctx.drawImage(img, 0,200,100,100, cx, cy, 80, 80);

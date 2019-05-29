@@ -39,15 +39,18 @@ for (i=0;i<12; i++){
 
 }
 var windowheight = 0;
-var position = 4*xbound/5+20;
+var position = 4*xbound/5+xbound/5/10;
 for (i=12;i<24; i++){
   if (i%3===0&&i!=12){
     windowheight+= ybound/4+20;
-    position =4*xbound/5+20;
+    position = 4*xbound/5+xbound/5/10;
   }
+
+
+  
   windowheights[i] = windowheight;
   windowpositions[i] = position;
-  position+=80;
+  position+= 3*xbound/5/10;
 }
 function resetObstacles(){
   var height = ybound+500;

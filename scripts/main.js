@@ -47,7 +47,7 @@ for (i=12;i<24; i++){
   }
 
 
-  
+
   windowheights[i] = windowheight;
   windowpositions[i] = position;
   position+= 3*xbound/5/10;
@@ -263,7 +263,15 @@ function collisionDetection(){
 function drawCarmen(){
 
 
-
+  if (rightPressed){
+    var img = document.getElementById("side_mid");
+    ctx.drawImage(img, 0,0,100,100, cx, cy, 80, 80);
+  }
+  else if (leftPressed){
+    var img = document.getElementById("side_mid_right");
+    ctx.drawImage(img, 0,0,100,100, cx, cy, 80, 80);
+  }
+  else{
   var img = document.getElementById("isabella");
 
   if (carmenStatus==0){
@@ -271,12 +279,13 @@ function drawCarmen(){
 
   }
   else if(carmenStatus==1){
-    ctx.drawImage(img, 0,100,100,100, cx, cy, 80, 80);
+    ctx.drawImage(img, 0,200,100,100, cx, cy, 80, 80);
   }
   else if(carmenStatus==2){
-    ctx.drawImage(img, 0,200,100,100, cx, cy, 80, 80);
+    ctx.drawImage(img, 0,400,100,100, cx, cy, 80, 80);
 
   }
+}
 
 };
 

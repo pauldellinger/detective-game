@@ -2,17 +2,21 @@
 var canvas = document.getElementById("c");
 var ctx = canvas.getContext("2d");
 var dx = 5;
-var dy = 11.5;
+var dy = 5;//5;
 var rightPressed = false;
 var leftPressed = false;
 var xbound = window.innerWidth;
 var ybound = window.innerHeight;
 var cx = xbound/2;
 var cy = ybound/4;
+var dkiller = ybound/4+60000;//ybound/4+60000;
+var ground = 70000;
 
 var y2 = window.innerHeight;
 var y3 = ybound;
 var heights = [];
+var ob_step = [];
+var ob_frame = [];
 var i;
 var j;
 var pos = [];
@@ -56,11 +60,14 @@ function resetObstacles(){
   var height = ybound+500;
   for (i = 0; i < obstacleCount; i++) {
     heights[i] = height;
-    height+=100;
+    height+=500;
     var min= xbound/5+30;
     var max=4*xbound/5-30;
     var random =Math.floor(Math.random() * (+max - +min)) + +min;
     pos[i] = random;
+    ob_frame = i%5;
+    ob_step[i] = 0;
+
   }
   var rightPressed = false;
   var leftPressed = false;
@@ -76,7 +83,7 @@ function draw(){
   //ctx.clearRect(0, 0, xbound, ybound);
   drawBackground();
 
-  if (step>4){
+  if (step>5){
     if (carmenStatus===2){
       carmenStatus=0;
     }
@@ -107,7 +114,7 @@ function draw(){
   drawObstacles();
   if (collisionDetection()){
     lives --;
-    var temp = dy;
+    resetObstacles();
 
     collide();
 
@@ -115,7 +122,7 @@ function draw(){
 
   }
 
-  if (dy<12&&dy>4.9&&performance.now()<10000){
+  if (dy<12&&dy>4.9){
     dy+=.001;
   }
 
@@ -141,18 +148,57 @@ function draw(){
   }
   */
 
-
+  dkiller-=dy;
+  ground -=dy;
+  if (dkiller<ybound+200){
+    dkiller=ky;
+  }
   drawSpeed();
   requestAnimationFrame(draw);
 }draw();
 function drawSpeed(){
-    ctx.font = "16px Arial";
+    ctx.font = "16px Iceberg";
     ctx.fillStyle = "#0095DD";
-    ctx.fillText("Score: "+dy, xbound/2, 20);
+    ctx.fillText("Speed: "+dy, xbound/2, 20);
     ctx.fillText("Time: "+performance.now(), xbound/2-200, 20);
-    ctx.fillText("killer height: "+xbound/5, xbound/5, 20);
+    ctx.fillText("killer height: "+ybound, xbound/5, 20);
 
+
+    ctx.fillStyle= "black";
+    ctx.fillRect(4*xbound/5,4.20*ybound/5,xbound/5, ybound/5);
+    var grd = ctx.createRadialGradient(4*xbound/5,4*ybound/5, 5, 4*xbound/5,4*ybound/5, 70);
+    grd.addColorStop(0, "blue");
+    grd.addColorStop(1, "white");
+    // Fill with gradient
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 5;
+    // ctx.strokeRect(4*xbound/5,4.20*ybound/5, ybound/5, ybound/5);
+
+
+    ctx.font = "42px Iceberg";
+    ctx.fillStyle = "Red";
+    ctx.fillText(""+('000' + Math.round((dkiller-ybound/3.8125)/20)).slice(-4), 4*xbound/5+5, 4.5*ybound/5);
+    ctx.font = "30px Iceberg";
+    ctx.fillStyle = "Red";
+    ctx.fillText(""+('m'), 4.33*xbound/5+5, 4.5*ybound/5);
+    ctx.font = "24px Iceberg";
+    ctx.fillStyle = "Red";
+    ctx.fillText(""+('TO CATCH'), 4*xbound/5+5, 4.7*ybound/5);
+    ctx.fillText(""+('THE KILLER'), 4*xbound/5+5, 4.9*ybound/5);
+
+    ctx.font = "42px Iceberg";
+    ctx.fillStyle = "Red";
+    ctx.fillText(""+('000' + Math.round((ground)/20)).slice(-4), 4.5*xbound/5+5, 4.5*ybound/5);
+    ctx.font = "30px Iceberg";
+    ctx.fillStyle = "Red";
+    ctx.fillText(""+('m'), 4.83*xbound/5+5, 4.5*ybound/5);
+    ctx.font = "24px Iceberg";
+    ctx.fillStyle = "Red";
+    ctx.fillText(""+('TO HIT THE'), 4.5*xbound/5+5, 4.7*ybound/5);
+    ctx.fillText(""+('GROUND'), 4.5*xbound/5+5, 4.9*ybound/5);
 }
+//you're gonna have to fill out a form
+//have you considered looking for a summer internship? it's a great way to start your career
 function drawKiller(){
   kx = 3*xbound/5;
   ctx.fillStyle = "green";
@@ -254,21 +300,35 @@ function collisionDetection(){
   for (i =0; i<obstacleCount; i++){
     var x = pos[i];
     var y = heights[i];
-    if (x<cx+25&&x+30>cx&&y<cy+50&&y+30>cy){
-      return true;
+    if (leftPressed){
+      if(x<cx+28*.8&&x+30>cx&&y<cy+80&&y+-4>cy){
+        return true;
+      }
+    }
+
+    else if (rightPressed){
+      if(x<cx+40&&x+14>cx&&y<cy+80&&y+30>cy){
+        return true;
+      }
+    }
+    else{
+      if(x<cx+40&&x+30>cx&&y<cy+80&&y+30>cy){
+        return true;
+      }
     }
   }
 }
+
 
 function drawCarmen(){
 
 
   if (rightPressed){
-    var img = document.getElementById("side_mid");
+    var img = document.getElementById("right");
     ctx.drawImage(img, 0,0,100,100, cx, cy, 80, 80);
   }
   else if (leftPressed){
-    var img = document.getElementById("side_mid_right");
+    var img = document.getElementById("left");
     ctx.drawImage(img, 0,0,100,100, cx, cy, 80, 80);
   }
   else{
@@ -298,6 +358,14 @@ function drawObstacles(){
       var random =Math.floor(Math.random() * (+max - +min)) + +min;
       pos[i] = random;
       heights[i] = ybound;
+      if (ob_step[i] ===5){
+        ob_frame[i] +=1;
+        if(ob_frame[i]>5) ob_frame=0;
+        ob_step[i]=0;
+      }
+      else{
+        ob_step+=1;
+      }
     }
     /*
     ctx.beginPath();
@@ -306,7 +374,7 @@ function drawObstacles(){
     ctx.closePath();
     */
     var img = document.getElementById("obstacle");
-    ctx.drawImage(img, pos[i],heights[i], 30, 30);
+    ctx.drawImage(img, ob_frame[i]*100,0, 90, 90, pos[i],heights[i], 90,90);
     heights[i]-=dy;
   }
 }

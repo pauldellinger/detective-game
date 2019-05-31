@@ -367,12 +367,7 @@ function drawObstacles(){
         ob_step+=1;
       }
     }
-    /*
-    ctx.beginPath();
-    ctx.fillStyle = "red";
-    ctx.fillRect(pos[i], heights[i], 30,30);
-    ctx.closePath();
-    */
+
     var img = document.getElementById("obstacle");
     ctx.drawImage(img, ob_frame[i]*100,0, 90, 90, pos[i],heights[i], 90,90);
     heights[i]-=dy;

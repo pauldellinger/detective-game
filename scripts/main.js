@@ -12,6 +12,20 @@ var cy = ybound/4;
 var dkiller = ybound/4+60000;//ybound/4+60000;
 var ground = 70000;
 
+function Obstacle(x, y, offset, step, frame, flip) {
+  this.x = x;
+  this.y = y;
+  this.offset = offset;
+  this.step = step;
+  this.frame = frame;
+  this.flip = flip;
+  this.draw = function () {
+    var img = document.getElementById("obstacle");
+    ctx.drawImage(img, this.frame*100,this.offset, 90, 50, this.x,this.y, 90,50);
+};
+}
+var obstacles = [];
+
 var y2 = window.innerHeight;
 var y3 = ybound;
 var heights = [];
@@ -59,30 +73,72 @@ for (i=12;i<24; i++){
 function resetObstacles(){
   var height = ybound+500;
   for (i = 0; i < obstacleCount; i++) {
-    heights[i] = height;
-    height+=500;
+
     var min= xbound/5+30;
     var max=4*xbound/5-30;
     var random =Math.floor(Math.random() * (+max - +min)) + +min;
-    pos[i] = random;
-    ob_frame = i%5;
-    ob_step[i] = 0;
-
+    frame = i%4;
+    step = 0;
+    var offset = i%3*50;
+    var random_boolean = Math.random() >= 0.5;
+    var flip = Math.random() >= 0.5;
+    var ob = new Obstacle(random, height, offset, step, frame, flip);
+    obstacles[i] = ob;
+    height+=500;
   }
   var rightPressed = false;
   var leftPressed = false;
   var cx = xbound/2;
   var cy = ybound/4;
   drawObstacles();
-  drawCarmen();
+  //drawCarmen();
 
 }
 resetObstacles();
 
-function draw(){
-  //ctx.clearRect(0, 0, xbound, ybound);
-  drawBackground();
+var text1 = ybound;
+var text2 = ybound-100;
+var text3 = ybound+100;
+function drawText(a){
+  resetObstacles();
+  var img1 = document.getElementById("chiara");
+  var img3 = document.getElementById("malevolent");
+  var img2 = document.getElementById("freefall");
+  if(text1>ybound/5|| a){
+  ctx.drawImage(img1, xbound/5, text1, xbound*.3, ybound/2);
 
+  ctx.drawImage(img2, xbound/5, text2, xbound*.6, ybound);
+
+  ctx.drawImage(img3, 2.5*xbound/5, text3, xbound*.3, ybound/2);
+  text1-=5;
+  text2-=5;
+  text3-=5;
+}
+  else{
+    ctx.drawImage(img1, xbound/5, text1, xbound*.3, ybound/2);
+
+    ctx.drawImage(img2, xbound/5, text2, xbound*.6, ybound);
+
+    ctx.drawImage(img3, 2.5*xbound/5, text3, xbound*.3, ybound/2);
+  }
+}
+cy = ybound;
+function draw(){
+
+  //ctx.clearRect(0, 0, xbound, ybound);
+
+  drawBackground();
+  drawSpeed();
+  if (text3+400>0){
+    if (performance.now()>6000){
+      drawText(true);
+    }
+    else{
+      drawText(false);
+    }
+  }
+
+  else{
   if (step>5){
     if (carmenStatus===2){
       carmenStatus=0;
@@ -97,7 +153,7 @@ function draw(){
 
 //Draw Square
   //drawKiller();
-  if(rightPressed && cx < 4*xbound/5-20) {
+  if(rightPressed && cx+40 < 4*xbound/5) {
     cx += 7;
   }
   else if(leftPressed && cx > xbound/5+2) {
@@ -111,7 +167,7 @@ function draw(){
     cy += 7;
   }
   */
-  drawObstacles();
+
   if (collisionDetection()){
     lives --;
     resetObstacles();
@@ -154,6 +210,7 @@ function draw(){
     dkiller=ky;
   }
   drawSpeed();
+}
   requestAnimationFrame(draw);
 }draw();
 function drawSpeed(){
@@ -161,7 +218,7 @@ function drawSpeed(){
     ctx.fillStyle = "#0095DD";
     ctx.fillText("Speed: "+dy, xbound/2, 20);
     ctx.fillText("Time: "+performance.now(), xbound/2-200, 20);
-    ctx.fillText("killer height: "+ybound, xbound/5, 20);
+    ctx.fillText("killer height: "+xbound, xbound/5, 20);
 
 
     ctx.fillStyle= "black";
@@ -243,15 +300,19 @@ function drawBackground(){
   ctx.fillStyle = "black";
   ctx.fillRect(0,0, xbound,ybound);
 
-  ctx.fillStyle = "#0A1322";
-  ctx.fillRect(0,0, xbound/5,ybound);
-  ctx.fillRect(4*xbound/5,0, xbound,ybound);
+
 
   var grd = ctx.createLinearGradient(0,0, 0, 1.5*ybound);
   grd.addColorStop(0, "#3B67BF");
   grd.addColorStop(1, "transparent");
   ctx.fillStyle = grd;
   ctx.fillRect(xbound/5,0, 3*xbound/5,ybound);
+
+  drawObstacles();
+
+  ctx.fillStyle = "#0A1322";
+  ctx.fillRect(0,0, xbound/5,ybound);
+  ctx.fillRect(4*xbound/5,0, xbound,ybound);
 
 
   for (i = 0; i < 24; i++) {
@@ -298,8 +359,8 @@ function drawBackground(){
 
 function collisionDetection(){
   for (i =0; i<obstacleCount; i++){
-    var x = pos[i];
-    var y = heights[i];
+    var x = obstacles[i].x;
+    var y = obstacles[i].y;
     if (leftPressed){
       if(x<cx+28*.8&&x+30>cx&&y<cy+80&&y+-4>cy){
         return true;
@@ -322,7 +383,9 @@ function collisionDetection(){
 
 function drawCarmen(){
 
-
+  if(cy>ybound/4){
+    cy-=5;
+  }
   if (rightPressed){
     var img = document.getElementById("right");
     ctx.drawImage(img, 0,0,100,100, cx, cy, 80, 80);
@@ -352,20 +415,24 @@ function drawCarmen(){
 function drawObstacles(){
   var i;
   for (i = 0; i < obstacleCount; i++) {
-    if (heights[i]<0){
+    var ob = obstacles[i];
+    if (obstacles[i].y+500<0){
       var min= xbound/5;
-      var max=4*xbound/5-30;
+      var max=4*xbound/5-90;
       var random =Math.floor(Math.random() * (+max - +min)) + +min;
-      pos[i] = random;
-      heights[i] = ybound;
-      if (ob_step[i] ===5){
-        ob_frame[i] +=1;
-        if(ob_frame[i]>5) ob_frame=0;
-        ob_step[i]=0;
-      }
-      else{
-        ob_step+=1;
-      }
+      obstacles[i].x= random;
+      obstacles[i].y = ybound;
+
+    }
+    if (obstacles[i].step ===3){
+      obstacles[i].frame +=1;
+      obstacles[i].step=0;
+    }
+    if(obstacles[i].frame>4){
+      obstacles[i].frame=0;
+    }
+    else{
+      obstacles[i].step+=1;
     }
     /*
     ctx.beginPath();
@@ -373,9 +440,22 @@ function drawObstacles(){
     ctx.fillRect(pos[i], heights[i], 30,30);
     ctx.closePath();
     */
+
     var img = document.getElementById("obstacle");
-    ctx.drawImage(img, ob_frame[i]*100,0, 90, 90, pos[i],heights[i], 90,90);
-    heights[i]-=dy;
+    if (obstacles[i].flip==1){
+
+    ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset+150, 90, 40, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
+    obstacles[i].x +=.5;
+
+    }
+    //ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset, 90, 40, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
+    else{
+      ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset, 90, 40, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
+      obstacles[i].x -=.5;
+    }
+    obstacles[i].y-=dy;
+
+
   }
 }
 

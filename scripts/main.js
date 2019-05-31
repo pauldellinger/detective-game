@@ -96,9 +96,9 @@ function resetObstacles(){
 }
 resetObstacles();
 
-var text1 = ybound;
-var text2 = ybound-100;
-var text3 = ybound+100;
+var text1 = ybound+200;
+var text2 = ybound+200-100;
+var text3 = ybound+200+100;
 function drawText(a){
   resetObstacles();
   var img1 = document.getElementById("chiara");
@@ -434,15 +434,12 @@ function drawObstacles(){
     else{
       obstacles[i].step+=1;
     }
-<<<<<<< HEAD
     /*
     ctx.beginPath();
     ctx.fillStyle = "red";
     ctx.fillRect(pos[i], heights[i], 30,30);
     ctx.closePath();
     */
-=======
->>>>>>> a246f7462af5a42ed56267b37fb9d24724f687e3
 
     var img = document.getElementById("obstacle");
     if (obstacles[i].flip==1){

@@ -24,6 +24,7 @@ function Obstacle(x, y, offset, step, frame, flip) {
     ctx.drawImage(img, this.frame*100,this.offset, 90, 50, this.x,this.y, 90,50);
 };
 }
+
 var obstacles = [];
 
 var y2 = window.innerHeight;
@@ -123,6 +124,7 @@ function drawText(a){
   }
 }
 cy = ybound;
+var sidestep=0;
 function draw(){
 
   //ctx.clearRect(0, 0, xbound, ybound);
@@ -149,16 +151,25 @@ function draw(){
     step=0;
   }
   step++;
-  drawCarmen();
+
 
 //Draw Square
   //drawKiller();
-  if(rightPressed && cx+40 < 4*xbound/5) {
+  if(rightPressed && cx+40 < 4*xbound/5&&!(rightPressed&&leftPressed)) {
+    sidestep++;
+    if (sidestep>4)sidestep=4;
     cx += 7;
   }
-  else if(leftPressed && cx > xbound/5+2) {
+  else if(leftPressed && cx > xbound/5+2&&!(rightPressed&&leftPressed)) {
+    sidestep--;
+    if (sidestep<-4)sidestep=-4;
     cx -= 7;
   }
+  else{
+    if(sidestep>0) sidestep--;
+    if(sidestep<0)sidestep++;
+  }
+  drawCarmen();
   /*
   else if(upPressed && cy > 0) {
     cy -= 7;
@@ -386,6 +397,32 @@ function drawCarmen(){
   if(cy>ybound/4){
     cy-=5;
   }
+
+  var img = document.getElementById("isabella");
+  if(sidestep<0) offset = 100;
+  if(sidestep>0) offset = 300;
+  if(sidestep<-3) offset = 0;
+  if(sidestep>3) offset =400;
+  if (sidestep==0){
+     offset = 200;
+
+
+    if (carmenStatus==0){
+      ctx.drawImage(img, offset,100*carmenStatus,100,100, cx, cy, 80, 80);
+
+    }
+    else if(carmenStatus==1){
+      ctx.drawImage(img, offset,100*carmenStatus,100,100, cx, cy, 80, 80);
+    }
+    else if(carmenStatus==2){
+      ctx.drawImage(img, offset,100*carmenStatus,100,100, cx, cy, 80, 80);
+
+    }
+  }
+  else{
+  ctx.drawImage(img, offset,0,100,100, cx, cy, 80, 80);
+}
+/*
   if (rightPressed){
     var img = document.getElementById("right");
     ctx.drawImage(img, 0,0,100,100, cx, cy, 80, 80);
@@ -394,21 +431,9 @@ function drawCarmen(){
     var img = document.getElementById("left");
     ctx.drawImage(img, 0,0,100,100, cx, cy, 80, 80);
   }
-  else{
-  var img = document.getElementById("isabella");
+  */
 
-  if (carmenStatus==0){
-    ctx.drawImage(img, 0,0,100,100, cx, cy, 80, 80);
 
-  }
-  else if(carmenStatus==1){
-    ctx.drawImage(img, 0,200,100,100, cx, cy, 80, 80);
-  }
-  else if(carmenStatus==2){
-    ctx.drawImage(img, 0,400,100,100, cx, cy, 80, 80);
-
-  }
-}
 
 };
 

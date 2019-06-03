@@ -11,19 +11,102 @@ var cx = xbound/2;
 var cy = ybound/4;
 var dkiller = ybound/4+60000;//ybound/4+60000;
 var ground = 70000;
+var collision = false;
 
+function getRandom(min, max) {
+  return Math.random() * (max - min) + min;
+};
+//a = getRandom(3,5);
 function Obstacle(x, y, offset, step, frame, flip) {
   this.x = x;
   this.y = y;
+  this.width = 90*1.25;
+  this.height = 50*1.25;
   this.offset = offset;
   this.step = step;
   this.frame = frame;
   this.flip = flip;
+  this.splatter = [];
+  this.yvel = dy;
+  this.colliding = false;
+  if (flip) this.xvel=.5;
+  if(!flip) this.xvel =-.5;
   this.draw = function () {
     var img = document.getElementById("obstacle");
     ctx.drawImage(img, this.frame*100,this.offset, 90, 50, this.x,this.y, 90,50);
 };
-}
+
+};
+Obstacle.prototype.explode = function() {
+  var max_vel = 3;
+  var max_rad = this.height * 0.7;
+  for (var i = 0; i < getRandom(18, 30); i++) {
+    x = this.x + getRandom(-this.width, this.width);
+    y = this.y + getRandom(-this.height, this.height);
+    xvel  = max_vel * Math.sin(getRandom(-Math.PI, Math.PI));
+    yvel =  max_vel * Math.sin(getRandom(-Math.PI, Math.PI));
+    dir = Math.atan(yvel/xvel);
+    speed = Math.sqrt(yvel*yvel + xvel*xvel);
+
+    p = new Particle(x, y, dir, speed, getRandom(5, max_rad), 50, getRandom(0.96, 0.99), getRandom(0.97, 0.992), 'red');
+    //p = new Particle(0, 0, 0, 0, 0, 0, 0, 0, 0);
+    q = 3;
+    this.splatter.push(p);
+  }
+
+};
+
+function Particle(x, y, dir, speed, rad, min_rad, scale_speed, drag, fill) {
+	this.x = x;
+  this.y =y;
+  this.direction = 0;
+  this.speed = 3;
+  this.wander = 0.2;
+  this.rad = rad;
+  this.scale = 1;
+  this.scale_speed = scale_speed;
+  this.drag = drag;
+  this.min_rad = min_rad;
+  this.fill = 'red';
+  this.update = function(){
+    this.scale *= .99;
+    this.speed *= this.drag;
+    this.x += this.speed * Math.cos(this.direction);
+    this.y += this.speed * Math.sign(this.direction);
+    this.direction += (Math.random() * 2 - 1) * this.wander;
+
+  };
+};
+
+
+
+
+Obstacle.prototype.displaySplatter = function(ctx) {
+  /*
+  ctx.beginPath();
+  ctx.arc(this.x, this.y,this.splatter.length, 0, Math.PI * 2);
+  ctx.fill();
+  */
+
+	//ctx.globalCompositeOperation = 'lighter';
+
+	for (var i = 0; i < this.splatter.length; i++) {
+		var particle = this.splatter[i];
+
+		ctx.fillStyle = particle.fill;
+
+		ctx.beginPath();
+		ctx.arc(particle.x, particle.y, particle.rad * particle.scale, 0, Math.PI * 2);
+    //ctx.arc(this.x, this.y,5, 0, Math.PI * 2);
+		ctx.fill();
+    particle.update();
+    if(particle.rad*this.scale<5) this.splatter.splice(i, 1);
+
+	}
+	//context.globalCompositeOperation = 'source-over';
+
+
+};
 
 var obstacles = [];
 
@@ -85,7 +168,7 @@ function resetObstacles(){
     var flip = Math.random() >= 0.5;
     var ob = new Obstacle(random, height, offset, step, frame, flip);
     obstacles[i] = ob;
-    height+=500;
+    height+=ybound/2;
   }
   var rightPressed = false;
   var leftPressed = false;
@@ -102,15 +185,15 @@ var text2 = ybound+200-100;
 var text3 = ybound+200+100;
 function drawText(a){
   resetObstacles();
-  var img1 = document.getElementById("chiara");
+  var img1 = document.getElementById("intro text");
   var img3 = document.getElementById("malevolent");
   var img2 = document.getElementById("freefall");
   if(text1>ybound/5|| a){
   ctx.drawImage(img1, xbound/5, text1, xbound*.3, ybound/2);
 
-  ctx.drawImage(img2, xbound/5, text2, xbound*.6, ybound);
+  //ctx.drawImage(img2, xbound/5, text2, xbound*.6, ybound);
 
-  ctx.drawImage(img3, 2.5*xbound/5, text3, xbound*.3, ybound/2);
+  //ctx.drawImage(img3, 2.5*xbound/5, text3, xbound*.3, ybound/2);
   text1-=5;
   text2-=5;
   text3-=5;
@@ -118,9 +201,9 @@ function drawText(a){
   else{
     ctx.drawImage(img1, xbound/5, text1, xbound*.3, ybound/2);
 
-    ctx.drawImage(img2, xbound/5, text2, xbound*.6, ybound);
+    //ctx.drawImage(img2, xbound/5, text2, xbound*.6, ybound);
 
-    ctx.drawImage(img3, 2.5*xbound/5, text3, xbound*.3, ybound/2);
+    //ctx.drawImage(img3, 2.5*xbound/5, text3, xbound*.3, ybound/2);
   }
 }
 cy = ybound;
@@ -178,16 +261,15 @@ function draw(){
     cy += 7;
   }
   */
-
   if (collisionDetection()){
+    collision = true;
     lives --;
-    resetObstacles();
-
-    collide();
-
-    cx = xbound/2;
-
+    //resetObstacles();
   }
+
+    //cx = xbound/2;
+
+
 
   if (dy<12&&dy>4.9){
     dy+=.001;
@@ -279,31 +361,14 @@ function drawKiller(){
   }
 }
 function collide(){
-  ctx.globalAlpha=1;
-  alpha = ctx.globalAlpha;
-  impactx= cx;
-  impacty =cy;
-  var j;
-  var k;
-  dartxes =[];
-  dartys=[];
-  for (j=1; j<10;j+=2){
-    ctx.fillStyle = "red";
-    k = j;
-    impactx = cx-5*k;
-    while (k!=0){
-      ctx.fillRect(impactx,impacty,5,5);
-      dartxes[j]=impactx;
-      dartys[j]=impacty;
-      impactx +=10;
-      k--;
-      alpha-=0.2;
+  for (i=0;i<obstacleCount;i++){
+    for(j=0;j<obstacles[i].splatter[j].length; j++){
+      particle = obstacles[i].splatter[j];
+      obstacles[i].displaySplatter();
+
+
     }
-    impactx=cx;
-    impacty-=5;
-
   }
-
   //cx = xbound/2;
 }
 function drawBackground(){
@@ -313,7 +378,7 @@ function drawBackground(){
 
 
 
-  var grd = ctx.createLinearGradient(0,0, 0, 1.5*ybound);
+  var grd = ctx.createLinearGradient(0,0, 0, 2*ybound/3);
   grd.addColorStop(0, "#3B67BF");
   grd.addColorStop(1, "transparent");
   ctx.fillStyle = grd;
@@ -374,17 +439,32 @@ function collisionDetection(){
     var y = obstacles[i].y;
     if (leftPressed){
       if(x<cx+28*.8&&x+30>cx&&y<cy+80&&y+-4>cy){
+        obstacles[i].xvel=0;
+        obstacles[i].explode();
+        obstacles[i].displaySplatter(ctx);
+        dy=0;
+        obstacles[i].colliding =true;
         return true;
       }
     }
 
     else if (rightPressed){
       if(x<cx+40&&x+14>cx&&y<cy+80&&y+30>cy){
+        obstacles[i].xvel=0;
+        obstacles[i].explode();
+        obstacles[i].displaySplatter(ctx);
+        dy=0;
+        obstacles[i].colliding =true;
         return true;
       }
     }
     else{
       if(x<cx+40&&x+30>cx&&y<cy+80&&y+30>cy){
+        obstacles[i].xvel=0;
+        if(!collision)obstacles[i].explode();
+        obstacles[i].displaySplatter(ctx);
+        dy=0;
+        obstacles[i].colliding =true;
         return true;
       }
     }
@@ -446,7 +526,7 @@ function drawObstacles(){
       var max=4*xbound/5-90;
       var random =Math.floor(Math.random() * (+max - +min)) + +min;
       obstacles[i].x= random;
-      obstacles[i].y = ybound;
+      obstacles[i].y = ybound+ybound/3;
 
     }
     if (obstacles[i].step ===3){
@@ -467,17 +547,18 @@ function drawObstacles(){
     */
 
     var img = document.getElementById("obstacle");
-    if (obstacles[i].flip==1){
+    if (obstacles[i].flip==1&&obstacles[i].colliding!=true){
 
-    ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset+150, 90, 40, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
-    obstacles[i].x +=.5;
+    ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset+150, 90, 50, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
+
 
     }
     //ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset, 90, 40, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
-    else{
-      ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset, 90, 40, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
-      obstacles[i].x -=.5;
+    else if(obstacles[i].colliding!=true){
+      ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset, 90, 50, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
+
     }
+    obstacles[i].x += obstacles[i].xvel;
     obstacles[i].y-=dy;
 
 

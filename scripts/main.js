@@ -54,14 +54,14 @@ Obstacle.prototype.explode = function() {
     dir = Math.atan(yvel/xvel);
     speed = Math.sqrt(yvel*yvel + xvel*xvel);
 
-    p = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad*2), 50, getRandom(0.96, 0.99), getRandom(0.97, 0.992), 'red');
+    p = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad*2), 50, getRandom(0.85, 0.90), getRandom(0.97, 0.992), 'red');
     //p = new Particle(0, 0, 0, 0, 0, 0, 0, 0, 0);
     this.splatter.push(p);
     //q = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.96, 0.99), getRandom(0.97, 0.992), '#ffffff');
     // /this.splatter.push(q);
-    r = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.96, 0.99), getRandom(0.97, 0.992), 'orange');
+    r = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.85, 0.90), getRandom(0.97, 0.992), 'orange');
     this.splatter.push(r);
-    s = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.96, 0.99), getRandom(0.97, 0.992), 'yellow');
+    s = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.85, 0.90), getRandom(0.97, 0.992), 'yellow');
     this.splatter.push(s);
   }
 
@@ -80,7 +80,7 @@ function Particle(x, y, dir, speed, rad, min_rad, scale_speed, drag, fill) {
   this.min_rad = min_rad;
   this.fill = fill;
   this.update = function(){
-    this.scale *= .85;
+    this.scale *= this.scale_speed;
     this.speed *= this.drag;
     this.x += this.speed * Math.cos(this.direction);
     this.y += this.speed * Math.sign(this.direction);
@@ -99,7 +99,7 @@ Obstacle.prototype.displaySplatter = function(ctx) {
   ctx.fill();
   */
 
-	ctx.globalCompositeOperation = 'lighter';
+	ctx.globalCompositeOperation ='screen';
 
 	for (var i = 0; i < this.splatter.length; i++) {
 		var particle = this.splatter[i];
@@ -172,20 +172,20 @@ function resetObstacles(){
     var min= xbound/5+30;
     var max=4*xbound/5-30;
     var random =Math.floor(Math.random() * (+max - +min)) + +min;
-    frame = i%4;
-    step = 0;
+    frameO = i%4;
+    stepO = 0;
     var offset = i%3*50;
     var random_boolean = Math.random() >= 0.5;
     var flip = Math.random() >= 0.5;
-    var ob = new Obstacle(random, height, offset, step, frame, flip);
+    var ob = new Obstacle(random, height, offset, stepO, frameO, flip);
     obstacles[i] = ob;
     height+=ybound/2;
   }
-  var rightPressed = false;
-  var leftPressed = false;
-  var cx = xbound/2;
-  var cy = ybound/4;
-  drawObstacles();
+  //var rightPressed = false;
+  //var leftPressed = false;
+  //var cx = xbound/2;
+  //var cy = ybound/4;
+  //drawObstacles();
   //drawCarmen();
 
 }
@@ -287,7 +287,7 @@ function draw(){
     dy+=.001;
     if(dy>max_speed) max_speed = dy;
   }
-  if(max_speed>dy){
+  if(max_speed>dy&&!(cy>ybound/4)){
     dy+=.1;
   }
 
@@ -318,7 +318,7 @@ function draw(){
   if (dkiller<ybound+200){
     dkiller=ky;
   }
-  drawSpeed();
+  //drawSpeed();
 }
   requestAnimationFrame(draw);
 }draw();
@@ -455,28 +455,29 @@ function collisionDetection(){
     var y = obstacles[i].y;
     if (leftPressed){
       if(x<cx+28*.8&&x+30>cx&&y<cy+80&&y+-4>cy){
-        obstacles[i].xvel=0;
+        //obstacles[i].xvel=0;
         obstacles[i].explode();
-        obstacles[i].displaySplatter(ctx);
+        //obstacles[i].displaySplatter(ctx);
 
         dy=0;
         obstacles[i].colliding =true;
-        //obstacles[i].y +=ybound;
-        cy =ybound+500;
+        obstacles[i].y +=ybound;
 
+        cy =ybound+500;
         return true;
       }
     }
 
     else if (rightPressed){
       if(x<cx+40&&x+14>cx&&y<cy+80&&y+30>cy){
-        obstacles[i].xvel=0;
+        //obstacles[i].xvel=0;
         obstacles[i].explode();
-        obstacles[i].displaySplatter(ctx);
+        //obstacles[i].displaySplatter(ctx);
 
         dy=0;
         obstacles[i].colliding =true;
         obstacles[i].y +=ybound;
+
         cy =ybound+500;
         return true;
       }
@@ -485,7 +486,7 @@ function collisionDetection(){
       if(x<cx+40&&x+30>cx&&y<cy+80&&y+30>cy){
         //obstacles[i].xvel=0;
         obstacles[i].explode();
-        obstacles[i].displaySplatter(ctx);
+        //obstacles[i].displaySplatter(ctx);
 
         dy=0;
         obstacles[i].colliding =true;
@@ -505,12 +506,12 @@ function drawCarmen(){
 
   if(cy>ybound/4){
     cy-=5;
-    if(carmenStatus ==1) return;
     //resetObstacles();
-    if(cy<ybound/3){
+    if(cy<ybound+50){
       // /dy=temp;
       resetObstacles();
     }
+    if(carmenStatus ==1) return;
   }
 
 
@@ -555,8 +556,12 @@ function drawCarmen(){
 
 function drawObstacles(){
   var i;
+
   for (i = 0; i < obstacleCount; i++) {
     var ob = obstacles[i];
+    obstacles[i].x += obstacles[i].xvel;
+    obstacles[i].y-=dy;
+
     if (obstacles[i].y+500<0){
       var min= xbound/5;
       var max=4*xbound/5-90;
@@ -584,18 +589,18 @@ function drawObstacles(){
 
     var img = document.getElementById("obstacle");
     if (obstacles[i].flip==1){
-
+    //if (cy<ybound+50 &&(obstacles[i].frame==0 || obstalces[i].frame==3))return;
     ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset+150, 90, 50, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
 
 
     }
     //ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset, 90, 40, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
     else{
+      //if (cy<ybound+50 &&(obstacles[i].frame==0 || obstalces[i].frame==3))return;
       ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset, 90, 50, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
 
     }
-    obstacles[i].x += obstacles[i].xvel;
-    obstacles[i].y-=dy;
+
 
 
   }

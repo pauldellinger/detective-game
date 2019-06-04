@@ -12,6 +12,7 @@ var cy = ybound/4;
 var dkiller = ybound/4+60000;//ybound/4+60000;
 var ground = 70000;
 var collision = false;
+var max_speed = 0;
 
 
 function getRandom(min, max) {
@@ -30,8 +31,11 @@ function Obstacle(x, y, offset, step, frame, flip) {
   this.splatter = [];
   this.yvel = dy;
   this.colliding = false;
+
+
   if (flip) this.xvel=.5;
   if(!flip) this.xvel =-.5;
+
   this.draw = function () {
     var img = document.getElementById("obstacle");
     ctx.drawImage(img, this.frame*100,this.offset, 90, 50, this.x,this.y, 90,50);
@@ -76,7 +80,7 @@ function Particle(x, y, dir, speed, rad, min_rad, scale_speed, drag, fill) {
   this.min_rad = min_rad;
   this.fill = fill;
   this.update = function(){
-    this.scale *= .75;
+    this.scale *= .85;
     this.speed *= this.drag;
     this.x += this.speed * Math.cos(this.direction);
     this.y += this.speed * Math.sign(this.direction);
@@ -279,8 +283,12 @@ function draw(){
 
 
 
-  if (dy<12&&dy>4.9){
+  if (dy<12&&dy>4.9&&dy>=max_speed){
     dy+=.001;
+    if(dy>max_speed) max_speed = dy;
+  }
+  if(max_speed>dy){
+    dy+=.1;
   }
 
   if (dy>12){
@@ -319,7 +327,7 @@ function drawSpeed(){
     ctx.fillStyle = "#0095DD";
     ctx.fillText("Speed: "+dy, xbound/2, 20);
     ctx.fillText("Time: "+performance.now(), xbound/2-200, 20);
-    ctx.fillText("killer height: "+xbound, xbound/5, 20);
+    ctx.fillText("killer height: "+max_speed, xbound/5, 20);
 
 
     ctx.fillStyle= "black";
@@ -454,7 +462,7 @@ function collisionDetection(){
         dy=0;
         obstacles[i].colliding =true;
         //obstacles[i].y +=ybound;
-        cy =ybound;
+        cy =ybound+500;
 
         return true;
       }
@@ -469,7 +477,7 @@ function collisionDetection(){
         dy=0;
         obstacles[i].colliding =true;
         obstacles[i].y +=ybound;
-        cy =ybound;
+        cy =ybound+500;
         return true;
       }
     }
@@ -483,7 +491,7 @@ function collisionDetection(){
         obstacles[i].colliding =true;
         obstacles[i].y +=ybound;
 
-        cy =ybound;
+        cy =ybound+500;
         return true;
 
       }
@@ -497,10 +505,11 @@ function drawCarmen(){
 
   if(cy>ybound/4){
     cy-=5;
+    if(carmenStatus ==1) return;
     //resetObstacles();
-    if(cy<ybound/3&&collision){
-      dy=temp;
-      //resetObstacles();
+    if(cy<ybound/3){
+      // /dy=temp;
+      resetObstacles();
     }
   }
 

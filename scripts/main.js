@@ -9,16 +9,50 @@ var xbound = window.innerWidth;
 var ybound = window.innerHeight;
 var cx = xbound/2;
 var cy = ybound/4;
-var dkiller = ybound/4+60000;//ybound/4+60000;
+var dkiller = ybound/4+60001;//ybound/4+60000;
 var ground = 70000;
 var collision = false;
 var max_speed = 0;
-
-
+var alerts = [];
+var alertOffset = 3;
+var invulnerable = true;
+var noNew =false;
 function getRandom(min, max) {
   return Math.random() * (max - min) + min;
 };
 //a = getRandom(3,5);
+function Alert(type){
+  this.y = ybound/8;
+  if (type == "life") this.y *=.5;
+  this.x = xbound/5-450;
+  this.type = type;
+  //this.text = text;
+  //this.offset =0;
+  this.scroll = true;
+  if (type == "altitude")this.offset = alertOffset *100;
+  if (type == "life") this.offset = 500 +100*deaths;
+
+
+
+  this.draw = function (){
+    if (this.scroll){
+      //resetObstacles();
+      var img = document.getElementById("alerts");
+      ctx.drawImage(img, 0,this.offset, 450, 95, this.x, this.y, 450, 95);
+
+    }
+    };
+  this.update = function(){
+    if (this.x<4*xbound/5){
+       this.x+= 5;
+    }
+    else{
+      this.scroll=false;
+      if (deaths==3)window.location.reload(false);
+    }
+  };
+
+};
 function Obstacle(x, y, offset, step, frame, flip) {
   this.x = x;
   this.y = y;
@@ -130,7 +164,7 @@ var i;
 var j;
 var pos = [];
 var obstacleCount = 10;
-var lives = 3;
+var deaths = 0;
 var step = 0;
 var carmenStatus= 0;
 
@@ -189,6 +223,8 @@ function resetObstacles(){
   //drawCarmen();
 
 }
+
+
 resetObstacles();
 
 var text1 = ybound;
@@ -275,7 +311,11 @@ function draw(){
   if (collisionDetection()){
     collision = true;
     var temp = dy;
-    lives --;
+    deaths++;
+    deathNotice = new Alert("life");
+    alerts.push(deathNotice);
+
+
     //resetObstacles();
   }
 
@@ -294,6 +334,7 @@ function draw(){
   if (dy>12){
     endgame = true;
     if (drawKiller()){
+      window.location.reload(false);
       ending_sequence();
     }
   }
@@ -315,19 +356,57 @@ function draw(){
 
   dkiller-=dy;
   ground -=dy;
+  if (Math.round(dkiller/20) == 3000 &&alertOffset==3){
+    p = new Alert("altitude");
+    alerts.push(p);
+    alertOffset--;
+  }
+  if (Math.round(dkiller/20) == 1200 &&alertOffset==2){
+    p = new Alert("altitude");
+    alerts.push(p);
+    alertOffset--;
+  }
+  if (Math.round(dkiller/20) == 600 &&alertOffset==1){
+    p = new Alert("altitude");
+    alerts.push(p);
+    alertOffset--;
+  }
+  updateAlerts();
+
+
+
   if (dkiller<ybound+200){
     dkiller=ky;
+  }
+  if (dkiller<ybound){
+    noNew=true;
   }
   //drawSpeed();
 }
   requestAnimationFrame(draw);
 }draw();
+
+function updateAlerts(){
+  for (i=0; i<alerts.length; i++){
+    alerts[i].update();
+
+    if (alerts[i].scroll == false){
+    alerts.splice(i,1);
+    }
+
+  }
+}
+function drawAlerts(){
+  for (i=0; i<alerts.length; i++){
+    alerts[i].draw();
+  }
+}
 function drawSpeed(){
     ctx.font = "16px Iceberg";
     ctx.fillStyle = "#0095DD";
     ctx.fillText("Speed: "+dy, xbound/2, 20);
     ctx.fillText("Time: "+performance.now(), xbound/2-200, 20);
-    ctx.fillText("killer height: "+max_speed, xbound/5, 20);
+    ctx.fillText("killer height: "+alertOffset, xbound/5, 20);
 
 
     ctx.fillStyle= "black";
@@ -400,6 +479,7 @@ function drawBackground(){
   ctx.fillStyle = grd;
   ctx.fillRect(xbound/5,0, 3*xbound/5,ybound);
 
+  drawAlerts();
   drawObstacles();
 
   ctx.fillStyle = "#0A1322";
@@ -454,7 +534,7 @@ function collisionDetection(){
     var x = obstacles[i].x;
     var y = obstacles[i].y;
     if (leftPressed){
-      if(x<cx+28*.8&&x+30>cx&&y<cy+80&&y+-4>cy){
+      if(x<cx+28*.8&&x+30>cx&&y<cy+80&&y+-4>cy && !invulnerable){
         //obstacles[i].xvel=0;
         obstacles[i].explode();
         //obstacles[i].displaySplatter(ctx);
@@ -469,7 +549,7 @@ function collisionDetection(){
     }
 
     else if (rightPressed){
-      if(x<cx+40&&x+14>cx&&y<cy+80&&y+30>cy){
+      if(x<cx+40&&x+14>cx&&y<cy+80&&y+30>cy && !invulnerable){
         //obstacles[i].xvel=0;
         obstacles[i].explode();
         //obstacles[i].displaySplatter(ctx);
@@ -483,7 +563,7 @@ function collisionDetection(){
       }
     }
     else{
-      if(x<cx+40&&x+30>cx&&y<cy+80&&y+30>cy){
+      if(x<cx+40&&x+30>cx&&y<cy+80&&y+30>cy && !invulnerable){
         //obstacles[i].xvel=0;
         obstacles[i].explode();
         //obstacles[i].displaySplatter(ctx);
@@ -507,12 +587,19 @@ function drawCarmen(){
   if(cy>ybound/4){
     cy-=5;
     //resetObstacles();
+    invulnerable = true;
     if(cy<ybound+50){
       // /dy=temp;
       resetObstacles();
+
+
     }
     if(carmenStatus ==1) return;
   }
+  else{
+    invulnerable = false;
+  }
+  if (deaths==3) return;
 
 
   var img = document.getElementById("isabella");
@@ -562,7 +649,7 @@ function drawObstacles(){
     obstacles[i].x += obstacles[i].xvel;
     obstacles[i].y-=dy;
 
-    if (obstacles[i].y+500<0){
+    if (obstacles[i].y+500<0 &&!noNew){
       var min= xbound/5;
       var max=4*xbound/5-90;
       var random =Math.floor(Math.random() * (+max - +min)) + +min;

@@ -13,6 +13,7 @@ var dkiller = ybound/4+60001;//ybound/4+60000;
 var ground = 70000;
 var collision = false;
 var max_speed = 0;
+var terminal = ybound/60;
 var alerts = [];
 var alertOffset = 3;
 var invulnerable = true;
@@ -164,7 +165,7 @@ var i;
 var j;
 var pos = [];
 var obstacleCount = 10;
-var deaths = 0;
+var deaths = -2;
 var step = 0;
 var carmenStatus= 0;
 
@@ -232,11 +233,12 @@ var text2 = ybound+200-100;
 var text3 = ybound+200+100;
 function drawText(a){
   resetObstacles();
-  var img1 = document.getElementById("intro text");
-  var img3 = document.getElementById("malevolent");
+  var img1 = document.getElementById("freefall");
+  var img3 = document.getElementById("bolt");
   var img2 = document.getElementById("freefall");
   if(text1>0|| a){
   ctx.drawImage(img1, xbound/5, text1, xbound*.6, ybound);
+
 
   //ctx.drawImage(img2, xbound/5, text2, xbound*.6, ybound);
 
@@ -246,7 +248,7 @@ function drawText(a){
   text3-=5;
 }
   else{
-    ctx.drawImage(img1, xbound/5, text1, xbound*.6, ybound);
+    ctx.drawImage(img2, xbound/5, text1, xbound*.6, ybound);
 
     //ctx.drawImage(img2, xbound/5, text2, xbound*.6, ybound);
 
@@ -323,7 +325,7 @@ function draw(){
 
 
 
-  if (dy<12&&dy>4.9&&dy>=max_speed){
+  if (dy<terminal&&dy>4.9&&dy>=max_speed){
     dy+=.001;
     if(dy>max_speed) max_speed = dy;
   }
@@ -331,7 +333,7 @@ function draw(){
     dy+=.1;
   }
 
-  if (dy>12){
+  if (dy>terminal){
     endgame = true;
     if (drawKiller()){
       window.location.reload(false);
@@ -406,7 +408,7 @@ function drawSpeed(){
     ctx.fillStyle = "#0095DD";
     ctx.fillText("Speed: "+dy, xbound/2, 20);
     ctx.fillText("Time: "+performance.now(), xbound/2-200, 20);
-    ctx.fillText("killer height: "+alertOffset, xbound/5, 20);
+    ctx.fillText("killer height: "+ybound, xbound/5, 20);
 
 
     ctx.fillStyle= "black";
@@ -654,7 +656,7 @@ function drawObstacles(){
       var max=4*xbound/5-90;
       var random =Math.floor(Math.random() * (+max - +min)) + +min;
       obstacles[i].x= random;
-      obstacles[i].y = ybound+ybound/3;
+      obstacles[i].y = ybound+getRandom(0,ybound/2);
 
     }
     if (obstacles[i].step ===3){
@@ -728,3 +730,11 @@ function keyUpHandler(e) {
     }
     */
 }
+
+function reportWindowSize() {
+  ybound = window.innerHeight;
+  xbound = window.innerWidth;
+  terminal = ybound/60;
+}
+
+window.onresize = reportWindowSize;

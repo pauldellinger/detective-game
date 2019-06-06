@@ -98,12 +98,12 @@ function Carmen(){
     if(rightPressed && izzy.x+40 < 4*xbound/5&&!(rightPressed&&leftPressed)) {
       izzy.sidestep++;
       if (izzy.sidestep>4)izzy.sidestep=4;
-      izzy.xvel+=1.5;
+      izzy.xvel+=xbound/1280;
     }
     else if(leftPressed && izzy.x > xbound/5+2&&!(rightPressed&&leftPressed)) {
       izzy.sidestep--;
       if (izzy.sidestep<-4)izzy.sidestep=-4;
-      izzy.xvel -= 1.5;
+      izzy.xvel -= xbound/1280;
     }
     else{
       if(izzy.sidestep>0) izzy.sidestep--;
@@ -475,7 +475,7 @@ function drawSpeed(){
     ctx.fillStyle = "#0095DD";
     ctx.fillText("Speed: "+dy, xbound/2, 20);
     ctx.fillText("Time: "+performance.now(), xbound/2-200, 20);
-    ctx.fillText("killer height: "+ybound, xbound/5, 20);
+    ctx.fillText("killer height: "+xbound, xbound/5, 20);
 
 
     ctx.fillStyle= "black";

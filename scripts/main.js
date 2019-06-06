@@ -412,7 +412,7 @@ function drawSpeed(){
 
 
     ctx.fillStyle= "black";
-    ctx.fillRect(4*xbound/5,4.20*ybound/5,xbound/5, ybound/5);
+    //ctx.fillRect(4*xbound/5,4.20*ybound/5,xbound/5, ybound/5);
     var grd = ctx.createRadialGradient(4*xbound/5,4*ybound/5, 5, 4*xbound/5,4*ybound/5, 70);
     grd.addColorStop(0, "blue");
     grd.addColorStop(1, "white");
@@ -424,25 +424,25 @@ function drawSpeed(){
 
     ctx.font = "42px Iceberg";
     ctx.fillStyle = "Red";
-    ctx.fillText(""+('000' + Math.round((dkiller-ybound/3.8125)/20)).slice(-4), 4*xbound/5+5, 4.5*ybound/5);
+    //ctx.fillText(""+('000' + Math.round((dkiller-ybound/3.8125)/20)).slice(-4), 4*xbound/5+5, 4.5*ybound/5);
     ctx.font = "30px Iceberg";
     ctx.fillStyle = "Red";
-    ctx.fillText(""+('m'), 4.33*xbound/5+5, 4.5*ybound/5);
+    //ctx.fillText(""+('m'), 4.33*xbound/5+5, 4.5*ybound/5);
     ctx.font = "24px Iceberg";
     ctx.fillStyle = "Red";
-    ctx.fillText(""+('TO CATCH'), 4*xbound/5+5, 4.7*ybound/5);
-    ctx.fillText(""+('THE KILLER'), 4*xbound/5+5, 4.9*ybound/5);
+    //ctx.fillText(""+('TO CATCH'), 4*xbound/5+5, 4.7*ybound/5);
+    //ctx.fillText(""+('THE KILLER'), 4*xbound/5+5, 4.9*ybound/5);
 
     ctx.font = "42px Iceberg";
     ctx.fillStyle = "Red";
-    ctx.fillText(""+('000' + Math.round((ground)/20)).slice(-4), 4.5*xbound/5+5, 4.5*ybound/5);
+    //ctx.fillText(""+('000' + Math.round((ground)/20)).slice(-4), 4.5*xbound/5+5, 4.5*ybound/5);
     ctx.font = "30px Iceberg";
     ctx.fillStyle = "Red";
-    ctx.fillText(""+('m'), 4.83*xbound/5+5, 4.5*ybound/5);
+    //ctx.fillText(""+('m'), 4.83*xbound/5+5, 4.5*ybound/5);
     ctx.font = "24px Iceberg";
     ctx.fillStyle = "Red";
-    ctx.fillText(""+('TO HIT THE'), 4.5*xbound/5+5, 4.7*ybound/5);
-    ctx.fillText(""+('GROUND'), 4.5*xbound/5+5, 4.9*ybound/5);
+    //ctx.fillText(""+('TO HIT THE'), 4.5*xbound/5+5, 4.7*ybound/5);
+    //ctx.fillText(""+('GROUND'), 4.5*xbound/5+5, 4.9*ybound/5);
 }
 //you're gonna have to fill out a form
 //have you considered looking for a summer internship? it's a great way to start your career

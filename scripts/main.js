@@ -2,7 +2,7 @@
 var canvas = document.getElementById("c");
 var ctx = canvas.getContext("2d");
 var dx = 5;
-var dy = 5;//5;
+var dy = 0;//5;
 var rightPressed = false;
 var leftPressed = false;
 var xbound = window.innerWidth;
@@ -112,6 +112,8 @@ function Carmen(){
   };
 
 }
+
+
 
 function Alert(type){
   this.y = ybound/8;
@@ -263,8 +265,42 @@ var carmenStatus= 0;
 var endgame = false;
 var ky = ybound +200;
 
+function Window(x,y){
+  this.x = x;
+  this.y = y;
+  if (Math.random() >= 0.9) this.lit = true;
+  this.update = function(){
+    if (this.y+80<0){
+      this.y = ybound;
+      if (Math.random() >= 0.9) this.lit = true;
+      else{
+        this.lit = false;
+      }
+    }
+    else {
+      this.y -=dy;
+    }
+  };
+  this.draw = function(){
+    if (this.lit){
+      var img = document.getElementById("window_lit");
+    }
+    else{
+    var img = document.getElementById("window_unlit");
+    }
+    ctx.globalAlpha = (1/(dy));
+    for (var i=0;i<(dy+1);++i){
+      ctx.drawImage(img, this.x, this.y+i, 80, 100);
+    }
+    ctx.globalAlpha = 1.0;
+  };
+};
+
+
 var windowheights=[];
 var windowpositions=[];
+var windows = [];
+
 var windowheight = 0;
 var position = xbound/5/10;
 for (i=0;i<12; i++){
@@ -272,8 +308,8 @@ for (i=0;i<12; i++){
     windowheight+= ybound/4+20;
     position = xbound/5/10;
   }
-  windowheights[i] = windowheight;
-  windowpositions[i] = position;
+  windows.push(new Window(position, windowheight));
+
   position+= 3*xbound/5/10;
 
 }
@@ -284,13 +320,10 @@ for (i=12;i<24; i++){
     windowheight+= ybound/4+20;
     position = 4*xbound/5+xbound/5/10;
   }
-
-
-
-  windowheights[i] = windowheight;
-  windowpositions[i] = position;
+  windows.push(new Window(position, windowheight));
   position+= 3*xbound/5/10;
 }
+
 function resetObstacles(){
   var height = ybound+500;
   for (i = 0; i < obstacleCount; i++) {
@@ -329,34 +362,116 @@ function drawText(a){
   var img2 = document.getElementById("freefall");
   if(text1>0|| a){
   ctx.drawImage(img1, xbound/5, text1, xbound*.6, ybound);
-
-
-  //ctx.drawImage(img2, xbound/5, text2, xbound*.6, ybound);
-
-  //ctx.drawImage(img3, 2.5*xbound/5, text3, xbound*.3, ybound/2);
   text1-=5;
   text2-=5;
   text3-=5;
-}
+  }
   else{
     ctx.drawImage(img2, xbound/5, text1, xbound*.6, ybound);
-
-    //ctx.drawImage(img2, xbound/5, text2, xbound*.6, ybound);
-
-    //ctx.drawImage(img3, 2.5*xbound/5, text3, xbound*.3, ybound/2);
   }
 }
+
+
 cy = ybound;
 var sidestep=0;
 var izzy = new Carmen();
+
+windowParticles =[];
+var max_velW = 80;
+var max_radW = 20;
+for (var i = 0; i < getRandom(50, 100); i++) {
+  x = xbound/5;
+  y = ybound/4 +80+ getRandom(-50, 50);
+  //dir = Math.atan(yvel/xvel);
+  //speed = Math.sqrt(yvel*yvel + xvel*xvel);
+  //(x, y, dir, speed, rad, min_rad, scale_speed, drag, fill)
+  p = new Particle(x, y, 2*Math.Pi, getRandom(0, max_velW), getRandom(5, max_radW), 50, getRandom(0.85, 0.90), getRandom(0.97, 0.992), 'silver');
+  //p = new Particle(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  windowParticles.push(p);
+}
+
+var malevolent = new Carmen();
+malevolent.x = xbound/5;
+malevolent.y = ybound/4;
+malevolent.xvel =10;
+malevolent.yvel=0;
+var hero = new Carmen();
+hero.x = -500;
+hero.y = ybound/4;
+hero.xvel =10;
+hero.yvel=0;
+function drawIntro(){
+
+  dy= 0;
+  //ctx.globalCompositeOperation ='screen';
+
+	for (var i = 0; i < windowParticles.length; i++) {
+		var particle = windowParticles[i];
+
+		ctx.fillStyle = particle.fill;
+
+		ctx.beginPath();
+		ctx.arc(particle.x, particle.y, particle.rad * particle.scale, 0, Math.PI * 2);
+    //ctx.arc(this.x, this.y,5, 0, Math.PI * 2);
+		ctx.fill();
+    particle.update();
+    if(particle.rad*particle.scale<5) windowParticles.splice(i, 1);
+
+	}
+	ctx.globalCompositeOperation = 'source-over';
+
+  if (malevolent.y <ybound){
+    malevolent.yvel +=.5;
+
+    malevolent.y+= malevolent.yvel;
+    malevolent.x += malevolent.xvel;
+  }
+  var img = document.getElementById("killer");
+  ctx.drawImage(img, malevolent.x, malevolent.y, 100, 100);
+
+  if(hero.y<ybound&&hero.x>xbound/5){
+    hero.yvel +=.5;
+
+    hero.y+= hero.yvel;
+  }
+  hero.x += hero.xvel;
+  var img = document.getElementById("hero");
+  ctx.drawImage(img, hero.x, hero.y, 100, 100);
+  ctx.fillStyle = "#0A1322";
+  ctx.fillRect(0,0, xbound/5,ybound);
+  ctx.fillRect(4*xbound/5,0, xbound,ybound);
+
+  drawWindows();
+  if (hero.y>ybound) intro = true;
+}
+var intro = false;
+
+
+var a = 1 + 3;
+var b;
+var start =false;
+if (performance.now<6000){
+  drawBackground();
+  drawSpeed();
+
+}
+
 function draw(){
 
   //ctx.clearRect(0, 0, xbound, ybound);
-
   drawBackground();
   drawSpeed();
-  if (text1+ybound>0){
-    if (performance.now()>6000){
+  if (performance.now()<3000){
+    dy=0;
+
+  }
+  else if (intro ==false){
+    drawIntro();
+
+  }
+  else if (text1+ybound>0){
+    dy=5;
+    if (performance.now()>9000){
       drawText(true);
     }
     else{
@@ -452,7 +567,9 @@ function draw(){
   }
   //drawSpeed();
 }
+
   requestAnimationFrame(draw);
+
 }draw();
 
 function updateAlerts(){
@@ -515,8 +632,8 @@ function drawSpeed(){
 //have you considered looking for a summer internship? it's a great way to start your career
 function drawKiller(){
   kx = 3*xbound/5;
-  ctx.fillStyle = "green";
-  ctx.fillRect(kx,ky,50,50);
+  img = document.getElementById("killer");
+  ctx.drawImage(img, kx, ky, 100, 100);
   if (ky>ybound/4){
     ky-=1;
   }
@@ -551,11 +668,13 @@ function drawBackground(){
   drawAlerts();
   drawObstacles();
 
+
   ctx.fillStyle = "#0A1322";
   ctx.fillRect(0,0, xbound/5,ybound);
   ctx.fillRect(4*xbound/5,0, xbound,ybound);
 
-
+  drawWindows();
+  /*
   for (i = 0; i < 24; i++) {
     if (windowheights[i]+80<0){
       windowheights[i] = ybound;
@@ -563,11 +682,11 @@ function drawBackground(){
     if (i%5===0){
       var img = document.getElementById("window_lit");
       ctx.drawImage(img, windowpositions[i], windowheights[i], 80, 100);
-      /*
+
       ctx.fillStyle = "#FFEE93";
       ctx.globalAlpha = 0.6;
       ctx.fillRect(windowpositions[i],windowheights[i], 50,80);
-      */
+
     }
     else{
     var img = document.getElementById("window_unlit");
@@ -584,10 +703,11 @@ function drawBackground(){
     ctx.fillRect(windowpositions[i]+50,windowheights[i],10,80);
     ctx.fillRect(windowpositions[i],windowheights[i]+80,50,10);
     ctx.globalAlpha = 1;
-    */
+
   }
     windowheights[i]-=dy;
   }
+  */
 
 
 
@@ -613,6 +733,7 @@ function collisionDetection(izzy){
         obstacles[i].y +=ybound;
 
         izzy.y =ybound+500;
+        izzy.x = xbound/2;
         return true;
       }
     }
@@ -628,6 +749,7 @@ function collisionDetection(izzy){
         obstacles[i].y +=ybound;
 
         izzy.y =ybound+500;
+        izzy.x = xbound/2;
         return true;
       }
     }
@@ -642,6 +764,7 @@ function collisionDetection(izzy){
         obstacles[i].y +=ybound;
 
         izzy.y =ybound+500;
+        izzy.x = xbound/2;
         return true;
 
       }
@@ -650,7 +773,17 @@ function collisionDetection(izzy){
   }
 }
 
-
+function updateWindows(){
+  for (i=0;i<windows.length; i++){
+    windows[i].update();
+  }
+}
+function drawWindows(){
+  for (i=0;i<windows.length; i++){
+    windows[i].update();
+    windows[i].draw();
+  }
+}
 function drawCarmen(){
 
   if(cy>ybound/4){

@@ -562,7 +562,7 @@ function draw(){
   if (dkiller<ybound+200){
     dkiller=ky;
   }
-  if (dkiller<ybound){
+  if ((dkiller)<ybound){
     noNew=true;
   }
   //drawSpeed();
@@ -592,7 +592,7 @@ function drawSpeed(){
     ctx.fillStyle = "#0095DD";
     ctx.fillText("Speed: "+dy, xbound/2, 20);
     ctx.fillText("Time: "+performance.now(), xbound/2-200, 20);
-    ctx.fillText("killer height: "+xbound, xbound/5, 20);
+    ctx.fillText("killer height: "+noNew, xbound/5, 20);
 
 
     ctx.fillStyle= "black";

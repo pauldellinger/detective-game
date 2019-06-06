@@ -209,7 +209,7 @@ function resetObstacles(){
     var random =Math.floor(Math.random() * (+max - +min)) + +min;
     frameO = i%4;
     stepO = 0;
-    var offset = i%3*50;
+    var offset =  Math.floor(Math.random() * Math.floor(6))*50;
     var random_boolean = Math.random() >= 0.5;
     var flip = Math.random() >= 0.5;
     var ob = new Obstacle(random, height, offset, stepO, frameO, flip);
@@ -679,7 +679,7 @@ function drawObstacles(){
     var img = document.getElementById("obstacle");
     if (obstacles[i].flip==1){
     //if (cy<ybound+50 &&(obstacles[i].frame==0 || obstalces[i].frame==3))return;
-    ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset+150, 90, 50, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
+    ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset+300, 90, 50, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
 
 
     }

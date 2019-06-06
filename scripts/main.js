@@ -22,6 +22,97 @@ function getRandom(min, max) {
   return Math.random() * (max - min) + min;
 };
 //a = getRandom(3,5);
+
+function Carmen(){
+  this.x = xbound/2;
+  this.y = ybound;
+  this.xvel = 0;
+  this.yvel = 0;
+  this.sidestep = 0;
+  this.frame =0;
+  this.drag = 0.9;
+
+  this.draw = function(){
+    if(this.y>ybound/4){
+      this.y-=5;
+      //resetObstacles();
+      invulnerable = true;
+      if(this.y<ybound+50){
+        // /dy=temp;
+        resetObstacles();
+
+
+      }
+      if(this.frame ==1) return;
+    }
+    else if (!cheat){
+      invulnerable = false;
+    }
+    if (deaths==3) return;
+
+
+    var img = document.getElementById("isabella");
+    if(this.sidestep<0) offset = 100;
+    if(this.sidestep>0) offset = 300;
+    if(this.sidestep<-3) offset = 0;
+    if(this.sidestep>3) offset =400;
+    if (this.sidestep==0){
+       offset = 200;
+
+
+      if (this.frame==0){
+        ctx.drawImage(img, offset,100*this.frame,100,100, this.x, this.y, 80, 80);
+
+      }
+      else if(this.frame==1){
+        ctx.drawImage(img, offset,100*this.frame,100,100, this.x, this.y, 80, 80);
+      }
+      else if(this.frame==2){
+        ctx.drawImage(img, offset,100*this.frame,100,100, this.x, this.y, 80, 80);
+
+      }
+    }
+    else{
+    ctx.drawImage(img, offset,0,100,100, this.x, this.y, 80, 80);
+    }
+  };
+  this.update = function(){
+    if ((this.x+this.xvel)+40 < 4*xbound/5&& (this.x+this.xvel) > xbound/5+2){
+    this.x +=this.xvel;
+    }
+    this.xvel *= this.drag;
+    if (step>5){
+      if (izzy.frame===2){
+        izzy.frame=0;
+      }
+      else{
+        izzy.frame ++;
+      }
+      step=0;
+    }
+    step++;
+
+
+  //Draw Square
+    //drawKiller();
+    if(rightPressed && izzy.x+40 < 4*xbound/5&&!(rightPressed&&leftPressed)) {
+      izzy.sidestep++;
+      if (izzy.sidestep>4)izzy.sidestep=4;
+      izzy.xvel+=1.5;
+    }
+    else if(leftPressed && izzy.x > xbound/5+2&&!(rightPressed&&leftPressed)) {
+      izzy.sidestep--;
+      if (izzy.sidestep<-4)izzy.sidestep=-4;
+      izzy.xvel -= 1.5;
+    }
+    else{
+      if(izzy.sidestep>0) izzy.sidestep--;
+      if(izzy.sidestep<0)izzy.sidestep++;
+    }
+  };
+
+}
+
 function Alert(type){
   this.y = ybound/8;
   if (type == "life") this.y *=.5;
@@ -257,6 +348,7 @@ function drawText(a){
 }
 cy = ybound;
 var sidestep=0;
+var izzy = new Carmen();
 function draw(){
 
   //ctx.clearRect(0, 0, xbound, ybound);
@@ -273,35 +365,10 @@ function draw(){
   }
 
   else{
-  if (step>5){
-    if (carmenStatus===2){
-      carmenStatus=0;
-    }
-    else{
-      carmenStatus ++;
-    }
-    step=0;
-  }
-  step++;
 
-
-//Draw Square
-  //drawKiller();
-  if(rightPressed && cx+40 < 4*xbound/5&&!(rightPressed&&leftPressed)) {
-    sidestep++;
-    if (sidestep>4)sidestep=4;
-    cx += 7;
-  }
-  else if(leftPressed && cx > xbound/5+2&&!(rightPressed&&leftPressed)) {
-    sidestep--;
-    if (sidestep<-4)sidestep=-4;
-    cx -= 7;
-  }
-  else{
-    if(sidestep>0) sidestep--;
-    if(sidestep<0)sidestep++;
-  }
-  drawCarmen();
+  //drawCarmen();
+  izzy.update();
+  izzy.draw();
   /*
   else if(upPressed && cy > 0) {
     cy -= 7;
@@ -310,7 +377,7 @@ function draw(){
     cy += 7;
   }
   */
-  if (collisionDetection()){
+  if (collisionDetection(izzy)){
     collision = true;
     var temp = dy;
     deaths++;
@@ -329,7 +396,7 @@ function draw(){
     dy+=.001;
     if(dy>max_speed) max_speed = dy;
   }
-  if(max_speed>dy&&!(cy>ybound/4)){
+  if(max_speed>dy&&!(izzy.y>ybound/4)){
     dy+=.1;
   }
 
@@ -453,7 +520,7 @@ function drawKiller(){
   if (ky>ybound/4){
     ky-=1;
   }
-  if(kx<cx+25&&kx+30>cx&&ky<cy+50&&ky+30>cy){
+  if(kx<izzy.x+25&&kx+30>izzy.x&&ky<izzy.y+50&&ky+30>izzy.y){
     return true;
   }
 }
@@ -531,12 +598,12 @@ function drawBackground(){
 
 
 
-function collisionDetection(){
+function collisionDetection(izzy){
   for (i =0; i<obstacleCount; i++){
     var x = obstacles[i].x;
     var y = obstacles[i].y;
     if (leftPressed){
-      if(x<cx+28*.8&&x+30>cx&&y<cy+80&&y+-4>cy && !invulnerable){
+      if(x<izzy.x+28*.8&&x+30>izzy.x&&y<izzy.y+80&&y+-4>izzy.y && !invulnerable){
         //obstacles[i].xvel=0;
         obstacles[i].explode();
         //obstacles[i].displaySplatter(ctx);
@@ -545,13 +612,13 @@ function collisionDetection(){
         obstacles[i].colliding =true;
         obstacles[i].y +=ybound;
 
-        cy =ybound+500;
+        izzy.y =ybound+500;
         return true;
       }
     }
 
     else if (rightPressed){
-      if(x<cx+40&&x+14>cx&&y<cy+80&&y+30>cy && !invulnerable){
+      if(x<izzy.x+40&&x+14>izzy.x&&y<izzy.y+80&&y+30>izzy.y && !invulnerable){
         //obstacles[i].xvel=0;
         obstacles[i].explode();
         //obstacles[i].displaySplatter(ctx);
@@ -560,12 +627,12 @@ function collisionDetection(){
         obstacles[i].colliding =true;
         obstacles[i].y +=ybound;
 
-        cy =ybound+500;
+        izzy.y =ybound+500;
         return true;
       }
     }
     else{
-      if(x<cx+40&&x+30>cx&&y<cy+80&&y+30>cy && !invulnerable){
+      if(x<izzy.x+40&&x+30>izzy.x&&y<izzy.y+80&&y+30>izzy.y && !invulnerable){
         //obstacles[i].xvel=0;
         obstacles[i].explode();
         //obstacles[i].displaySplatter(ctx);
@@ -574,7 +641,7 @@ function collisionDetection(){
         obstacles[i].colliding =true;
         obstacles[i].y +=ybound;
 
-        cy =ybound+500;
+        izzy.y =ybound+500;
         return true;
 
       }
@@ -657,6 +724,7 @@ function drawObstacles(){
       var random =Math.floor(Math.random() * (+max - +min)) + +min;
       obstacles[i].x= random;
       obstacles[i].y = ybound+getRandom(0,ybound/2);
+      obstacles[i].offset = Math.floor(Math.random() * Math.floor(6))*50;
 
     }
     if (obstacles[i].step ===3){

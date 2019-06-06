@@ -598,7 +598,7 @@ function drawCarmen(){
     }
     if(carmenStatus ==1) return;
   }
-  else{
+  else if (!cheat){
     invulnerable = false;
   }
   if (deaths==3) return;
@@ -694,7 +694,7 @@ function drawObstacles(){
 
   }
 }
-
+var cheat = false;
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 function keyDownHandler(e) {
@@ -703,6 +703,10 @@ function keyDownHandler(e) {
     }
     else if(e.key == "Left" || e.key == "ArrowLeft") {
         leftPressed = true;
+    }
+    else if(e.key == "s") {
+        invulnerable = true;
+        cheat = true;
     }
     /*
     else if(e.key == "Up" || e.key == "ArrowUp") {
@@ -721,6 +725,10 @@ function keyUpHandler(e) {
     else if(e.key == "Left" || e.key == "ArrowLeft") {
         leftPressed = false;
     }
+    else if(e.key == "s") {
+        invulnerable = false;
+        cheat = false;
+    }
     /*
     else if(e.key == "Up" || e.key == "ArrowUp") {
         upPressed = false;
@@ -730,6 +738,7 @@ function keyUpHandler(e) {
     }
     */
 }
+
 
 function reportWindowSize() {
   ybound = window.innerHeight;

@@ -377,6 +377,7 @@ var sidestep=0;
 var izzy = new Carmen();
 
 windowParticles =[];
+windowParticles2 =[];
 var max_velW = 80;
 var max_radW = 20;
 for (var i = 0; i < getRandom(50, 100); i++) {
@@ -388,6 +389,7 @@ for (var i = 0; i < getRandom(50, 100); i++) {
   p = new Particle(x, y, 2*Math.Pi, getRandom(0, max_velW), getRandom(5, max_radW), 50, getRandom(0.85, 0.90), getRandom(0.97, 0.992), 'silver');
   //p = new Particle(0, 0, 0, 0, 0, 0, 0, 0, 0);
   windowParticles.push(p);
+  windowParticles2.push(p);
 }
 
 var malevolent = new Carmen();
@@ -430,6 +432,19 @@ function drawIntro(){
   ctx.drawImage(img, malevolent.x, malevolent.y, 100, 100);
 
   if(hero.y<ybound&&hero.x>xbound/5){
+    for (var i = 0; i < windowParticles2.length; i++) {
+  		var particle = windowParticles2[i];
+
+  		ctx.fillStyle = particle.fill;
+
+  		ctx.beginPath();
+  		ctx.arc(particle.x, particle.y, particle.rad * particle.scale, 0, Math.PI * 2);
+      //ctx.arc(this.x, this.y,5, 0, Math.PI * 2);
+  		ctx.fill();
+      particle.update();
+      if(particle.rad*particle.scale<5) windowParticles2.splice(i, 1);
+
+  	}
     hero.yvel +=.5;
 
     hero.y+= hero.yvel;

@@ -1,4 +1,4 @@
-
+var soundtrack = new Audio('music/soundtrack.mp3');
 var canvas = document.getElementById("c");
 var ctx = canvas.getContext("2d");
 var dx = 5;
@@ -132,7 +132,7 @@ function Alert(type){
     if (this.scroll){
       //resetObstacles();
       var img = document.getElementById("alerts");
-      ctx.drawImage(img, 0,this.offset, 450, 95, this.x, this.y, 450, 95);
+      ctx.drawImage(img, 0,this.offset, 700, 95, this.x, this.y, 700, 95);
 
     }
     };
@@ -396,7 +396,7 @@ malevolent.y = ybound/4;
 malevolent.xvel =10;
 malevolent.yvel=0;
 var hero = new Carmen();
-hero.x = -500;
+hero.x = -800;
 hero.y = ybound/4;
 hero.xvel =10;
 hero.yvel=0;
@@ -455,7 +455,7 @@ if (performance.now<6000){
   drawSpeed();
 
 }
-
+soundtrack.play();
 function draw(){
 
   //ctx.clearRect(0, 0, xbound, ybound);
@@ -471,7 +471,7 @@ function draw(){
   }
   else if (text1+ybound>0){
     dy=5;
-    if (performance.now()>9000){
+    if (performance.now()>11000){
       drawText(true);
     }
     else{

@@ -773,53 +773,24 @@ function collisionDetection(izzy){
   for (i =0; i<obstacleCount; i++){
     var x = obstacles[i].x;
     var y = obstacles[i].y;
-    if (leftPressed){
-      if(x<izzy.x+28*.8&&x+30>izzy.x&&y<izzy.y+80&&y+-4>izzy.y && !invulnerable){
-        //obstacles[i].xvel=0;
-        obstacles[i].explode();
-        //obstacles[i].displaySplatter(ctx);
 
-        dy=0;
-        obstacles[i].colliding =true;
-        obstacles[i].y +=ybound;
+    if (izzy.x < obstacles[i].x + obstacles[i].width &&
+     izzy.x + izzy.width/2 > obstacles[i].x &&
+     izzy.y < obstacles[i].y + obstacles[i].height &&
+     izzy.y + izzy.height > obstacles[i].y &&
+     !invulnerable){
+      //obstacles[i].xvel=0;
+      obstacles[i].explode();
+      //obstacles[i].displaySplatter(ctx);
+      dy=0;
+      obstacles[i].colliding =true;
+      obstacles[i].y +=ybound;
 
-        izzy.y =ybound+500;
-        izzy.x = xbound/2;
-        return true;
-      }
-    }
-
-    else if (rightPressed){
-      if(x<izzy.x+40&&x+14>izzy.x&&y<izzy.y+80&&y+30>izzy.y && !invulnerable){
-        //obstacles[i].xvel=0;
-        obstacles[i].explode();
-        //obstacles[i].displaySplatter(ctx);
-
-        dy=0;
-        obstacles[i].colliding =true;
-        obstacles[i].y +=ybound;
-
-        izzy.y =ybound+500;
-        izzy.x = xbound/2;
-        return true;
-      }
-    }
-    else{
-      if(x<izzy.x+40&&x+30>izzy.x&&y<izzy.y+80&&y+30>izzy.y && !invulnerable){
-        //obstacles[i].xvel=0;
-        obstacles[i].explode();
-        //obstacles[i].displaySplatter(ctx);
-
-        dy=0;
-        obstacles[i].colliding =true;
-        obstacles[i].y +=ybound;
-
-        izzy.y =ybound+500;
-        izzy.x = xbound/2;
-        return true;
+      izzy.y =ybound+500;
+      izzy.x = xbound/2;
+      return true;
 
       }
-    }
     obstacles[i].displaySplatter(ctx);
   }
 }

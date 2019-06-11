@@ -382,7 +382,7 @@ function resetObstacles(){
 resetObstacles();
 
 var text1 = ybound;
-var text2 =2* ybound-200;
+var text2 =3* ybound-200;
 var text3 = ybound+200+100;
 function drawText(a){
   resetObstacles();
@@ -402,7 +402,8 @@ function drawText(a){
     ctx.textAlign = "center";
     ctx.font = "42px Iceberg";
     ctx.fillStyle = "white";
-    ctx.fillText("Use Arrowkeys to Move", xbound/2, text2);
+    ctx.fillText("Use Arrowkeys to Avoid Cars", xbound/2, text2-100);
+    ctx.fillText("Press Space to Pause", xbound/2, text2);
     ctx.textAlign = "start";
   }
 }
@@ -439,6 +440,28 @@ hero.x = -800;
 hero.y = ybound/4;
 hero.xvel =10;
 hero.yvel=0;
+var parachute = new Carmen();
+parachute.x = xbound*.6;
+parachute.y = ybound/4;
+
+
+function drawOutro(){
+  dy=0;
+  if (izzy.y<ybound){
+    izzy.y = 2*ybound;
+  }
+  resetObstacles();
+  if (parachute.res>0){
+    parachute.res-=.005;
+    parachute.y-=.01;
+  }
+  else{
+    window.location.reload(false);
+  }
+  var img = document.getElementById("rescue");
+  ctx.drawImage(img, parachute.x-200, parachute.y-200, 500*parachute.res, 500*parachute.res);
+
+}
 function drawIntro(){
 
   dy= 0;
@@ -468,7 +491,7 @@ function drawIntro(){
   var img = document.getElementById("killer");
   ctx.drawImage(img, malevolent.x, malevolent.y, 100, 100);
 
-  if(hero.y<ybound&&hero.x>xbound/5-100){
+  if(hero.y<ybound&&hero.x>xbound/5-40){
     for (var i = 0; i < windowParticles2.length; i++) {
   		var particle = windowParticles2[i];
 
@@ -488,7 +511,7 @@ function drawIntro(){
   }
   hero.x += hero.xvel;
   var img = document.getElementById("hero");
-  ctx.drawImage(img, hero.x, hero.y, 100, 100);
+  ctx.drawImage(img, hero.x, hero.y, hero.width, hero.height);
   ctx.fillStyle = "#0A1322";
   ctx.fillRect(0,0, xbound/5,ybound);
   ctx.fillRect(4*xbound/5,0, xbound,ybound);
@@ -520,7 +543,7 @@ function draw(){
     drawIntro();
 
   }
-  else if (text1+ybound>0){
+  else if (text2+100>0){
     dy=5;
     if (performance.now()>11000){
       drawText(true);
@@ -528,6 +551,9 @@ function draw(){
     else{
       drawText(false);
     }
+  }
+  else if (endgame){
+    drawOutro();
   }
 
   else{
@@ -566,11 +592,10 @@ function draw(){
     dy+=.1;
   }
 
-  if (dy>terminal){
-    endgame = true;
+  if (dy>5.3){
     if (drawKiller()){
-      window.location.reload(false);
-      ending_sequence();
+      //window.location.reload(false);
+      endgame = true;
     }
   }
 
@@ -931,6 +956,12 @@ function keyDownHandler(e) {
         invulnerable = true;
         cheat = true;
     }
+    else if(e.key == "a") {
+        leftPressed = true;
+    }
+    else if(e.key == "d") {
+        rightPressed = true;
+    }
     /*
     else if(e.key == "Up" || e.key == "ArrowUp") {
         upPressed = true;
@@ -947,6 +978,12 @@ function keyUpHandler(e) {
     }
     else if(e.key == "Left" || e.key == "ArrowLeft") {
         leftPressed = false;
+    }
+    else if(e.key == "a") {
+        leftPressed = false;
+    }
+    else if(e.key == "d") {
+        rightPressed = false;
     }
     else if(e.key == "s") {
         invulnerable = false;

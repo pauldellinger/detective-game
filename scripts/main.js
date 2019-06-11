@@ -32,7 +32,7 @@ function Carmen(){
   this.sidestep = 0;
   this.frame =0;
   this.drag = 0.9;
-  this.res = xbound*ybound/2073600;
+  this.res = ybound/1920;
   this.width = 80*this.res;
   this.height = 80*this.res;
 
@@ -592,7 +592,7 @@ function draw(){
     dy+=.1;
   }
 
-  if (dy>5.3){
+  if (dy>terminal){
     if (drawKiller()){
       //window.location.reload(false);
       endgame = true;

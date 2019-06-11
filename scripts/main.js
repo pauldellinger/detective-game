@@ -32,12 +32,12 @@ function Carmen(){
   this.sidestep = 0;
   this.frame =0;
   this.drag = 0.9;
-  this.res = ybound/1920;
+  this.res = ybound/720;
   this.width = 80*this.res;
   this.height = 80*this.res;
 
   this.resize = function(){
-    this.res = xbound*ybound/2073600;
+    this.res = ybound/1080;
     this.width = 80*this.res;
     this.height = 80*this.res;
   };
@@ -159,7 +159,7 @@ function Alert(type){
 function Obstacle(x, y, offset, step, frame, flip) {
   this.x = x;
   this.y = y;
-  this.res = xbound*ybound/1658880;
+  this.res = ybound/720;
   this.width = 90*this.res;
   this.height = 50*this.res;
   this.offset = offset;

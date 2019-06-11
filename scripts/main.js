@@ -1,4 +1,4 @@
-var soundtrack = new Audio('music/soundtrack.mp3');
+//var soundtrack = new Audio('music/soundtrack.mp3');
 var canvas = document.getElementById("c");
 var ctx = canvas.getContext("2d");
 var dx = 5;
@@ -18,6 +18,7 @@ var alerts = [];
 var alertOffset = 3;
 var invulnerable = true;
 var noNew =false;
+var pause = false;
 function getRandom(min, max) {
   return Math.random() * (max - min) + min;
 };
@@ -31,7 +32,15 @@ function Carmen(){
   this.sidestep = 0;
   this.frame =0;
   this.drag = 0.9;
+  this.res = xbound*ybound/2073600;
+  this.width = 80*this.res;
+  this.height = 80*this.res;
 
+  this.resize = function(){
+    this.res = xbound*ybound/2073600;
+    this.width = 80*this.res;
+    this.height = 80*this.res;
+  };
   this.draw = function(){
     if(this.y>ybound/4){
       this.y-=5;
@@ -61,19 +70,19 @@ function Carmen(){
 
 
       if (this.frame==0){
-        ctx.drawImage(img, offset,100*this.frame,100,100, this.x, this.y, 80, 80);
+        ctx.drawImage(img, offset,100*this.frame,100,100, this.x, this.y, this.width, this.height);
 
       }
       else if(this.frame==1){
-        ctx.drawImage(img, offset,100*this.frame,100,100, this.x, this.y, 80, 80);
+        ctx.drawImage(img, offset,100*this.frame,100,100, this.x, this.y, this.width, this.height);
       }
       else if(this.frame==2){
-        ctx.drawImage(img, offset,100*this.frame,100,100, this.x, this.y, 80, 80);
+        ctx.drawImage(img, offset,100*this.frame,100,100, this.x, this.y, this.width, this.height);
 
       }
     }
     else{
-    ctx.drawImage(img, offset,0,100,100, this.x, this.y, 80, 80);
+    ctx.drawImage(img, offset,0,100,100, this.x, this.y, this.width, this.height);
     }
   };
   this.update = function(){
@@ -150,8 +159,9 @@ function Alert(type){
 function Obstacle(x, y, offset, step, frame, flip) {
   this.x = x;
   this.y = y;
-  this.width = 90*1.25;
-  this.height = 50*1.25;
+  this.res = xbound*ybound/1658880;
+  this.width = 90*this.res;
+  this.height = 50*this.res;
   this.offset = offset;
   this.step = step;
   this.frame = frame;
@@ -163,7 +173,11 @@ function Obstacle(x, y, offset, step, frame, flip) {
 
   if (flip) this.xvel=.5;
   if(!flip) this.xvel =-.5;
-
+  this.resize = function(){
+    this.res = xbound*ybound/1658880;
+    this.width = 90*this.res;
+    this.height = 50*this.res;
+  };
   this.draw = function () {
     var img = document.getElementById("obstacle");
     ctx.drawImage(img, this.frame*100,this.offset, 90, 50, this.x,this.y, 90,50);
@@ -288,11 +302,16 @@ function Window(x,y){
     else{
     var img = document.getElementById("window_unlit");
     }
+    ctx.globalAlpha = .8;
+    ctx.drawImage(img, this.x, this.y+i, 80, 100);
+    /*
     ctx.globalAlpha = (1/(dy));
     for (var i=0;i<(dy+1);++i){
       ctx.drawImage(img, this.x, this.y+i, 80, 100);
     }
+    */
     ctx.globalAlpha = 1.0;
+
   };
 };
 
@@ -300,8 +319,12 @@ function Window(x,y){
 var windowheights=[];
 var windowpositions=[];
 var windows = [];
-
+function clearWindows(){
+  windows = [];
+}
+function genWindows(){
 var windowheight = 0;
+
 var position = xbound/5/10;
 for (i=0;i<12; i++){
   if (i%3===0&&i!=0){
@@ -323,7 +346,13 @@ for (i=12;i<24; i++){
   windows.push(new Window(position, windowheight));
   position+= 3*xbound/5/10;
 }
-
+}
+genWindows();
+function resizeObstacles(){
+  for (i=0; i<obstacles.length; i++){
+    obstacles[i].resize();
+  }
+}
 function resetObstacles(){
   var height = ybound+500;
   for (i = 0; i < obstacleCount; i++) {
@@ -353,7 +382,7 @@ function resetObstacles(){
 resetObstacles();
 
 var text1 = ybound;
-var text2 = ybound+200-100;
+var text2 =2* ybound-200;
 var text3 = ybound+200+100;
 function drawText(a){
   resetObstacles();
@@ -369,7 +398,15 @@ function drawText(a){
   else{
     ctx.drawImage(img2, xbound/5, text1, xbound*.6, ybound);
   }
+  if (text2-200<ybound){
+    ctx.textAlign = "center";
+    ctx.font = "42px Iceberg";
+    ctx.fillStyle = "white";
+    ctx.fillText("Use Arrowkeys to Move", xbound/2, text2);
+    ctx.textAlign = "start";
+  }
 }
+
 
 
 cy = ybound;
@@ -431,7 +468,7 @@ function drawIntro(){
   var img = document.getElementById("killer");
   ctx.drawImage(img, malevolent.x, malevolent.y, 100, 100);
 
-  if(hero.y<ybound&&hero.x>xbound/5){
+  if(hero.y<ybound&&hero.x>xbound/5-100){
     for (var i = 0; i < windowParticles2.length; i++) {
   		var particle = windowParticles2[i];
 
@@ -470,10 +507,9 @@ if (performance.now<6000){
   drawSpeed();
 
 }
-soundtrack.play();
+//soundtrack.play();
 function draw(){
-
-  //ctx.clearRect(0, 0, xbound, ybound);
+  if(!pause){
   drawBackground();
   drawSpeed();
   if (performance.now()<3000){
@@ -582,7 +618,7 @@ function draw(){
   }
   //drawSpeed();
 }
-
+}
   requestAnimationFrame(draw);
 
 }draw();
@@ -895,14 +931,14 @@ function drawObstacles(){
     var img = document.getElementById("obstacle");
     if (obstacles[i].flip==1){
     //if (cy<ybound+50 &&(obstacles[i].frame==0 || obstalces[i].frame==3))return;
-    ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset+300, 90, 50, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
+    ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset+300, 90, 50, obstacles[i].x,obstacles[i].y, obstacles[i].width,obstacles[i].height);
 
 
     }
     //ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset, 90, 40, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
     else{
       //if (cy<ybound+50 &&(obstacles[i].frame==0 || obstalces[i].frame==3))return;
-      ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset, 90, 50, obstacles[i].x,obstacles[i].y, 90*1.25,50*1.25);
+      ctx.drawImage(img, obstacles[i].frame*100,obstacles[i].offset, 90, 50, obstacles[i].x,obstacles[i].y, obstacles[i].width,obstacles[i].height);
 
     }
 
@@ -954,12 +990,43 @@ function keyUpHandler(e) {
     }
     */
 }
+function togglePause()
+{
+    if (!pause)
+    {
+        pause = true;
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = "black";
+        ctx.fillRect(0,0, xbound,ybound);
+        ctx.globalAlpha =1;
+        ctx.textAlign = "center";
+        ctx.font = "42px Iceberg";
+        ctx.fillStyle = "white";
+        ctx.fillText("PRESS [SPACE] TO RESUME", xbound/2, ybound/2);
+        ctx.textAlign = "start";
 
+    } else if (pause)
+    {
+       pause= false;
+    }
 
+}
+
+window.addEventListener('keydown', function (e) {
+var key = e.keyCode;
+if (key === 32)// spacebar
+{
+    togglePause();
+}
+});
 function reportWindowSize() {
   ybound = window.innerHeight;
   xbound = window.innerWidth;
   terminal = ybound/60;
+  clearWindows();
+  genWindows();
+  izzy.resize();
+  resizeObstacles();
 }
 
 window.onresize = reportWindowSize;

@@ -13,73 +13,13 @@
       display: block;  /* No floating content on sides */
     }
     </style>
-    <link href="https://fonts.googleapis.com/css?family=Iceberg&display=swap" rel="stylesheet">
+    <a href="html/freefall.html">
+      <img src="html/images/freefall.png" style="width:384px;height:305px;border:0;">
+    </a>
+    <a href="html/missiles.html">
+      <img src="html/images/missiles.png" style="width:384px;height:305px;border:0;">
+    </a>
 </head>
-<audio controls>
-  <source src="soundtrack.mp3" type="audio/mp3">
-</audio>
-<body>
-    <img id="carmen" src="images/Asset 5.png" alt="The Scream" width="20" height="20">
-    <img id="obstacle" src="images/taxis.png" alt="The Scream" width="550" height="660">
-    <img id="isabella" src="images/isabella.png" alt="The Scream" width="500" height="600">
-    <img id="window_unlit" src="images/window_unlit.png" alt="The Scream" width="100" height="200">
-    <img id="window_lit" src="images/window_lit.png" alt="The Scream" width="100" height="200">
-    <img id="right" src="images/right.png" alt="The Scream" width="100" height="100">
-    <img id="left" src="images/isabella side mid.png" alt="The Scream" width="100" height="100">
-    <img id="chiara" src="images/intro/chiara.png" alt="The Scream" width="1536" height="1220">
-    <img id="malevolent" src="images/intro/malevolent.png" alt="The Scream" width="1536" height="1220">
-    <img id="side_full" src="images/isabella_side_full.png" alt="The Scream" width="150" height="100">
-    <img id="freefall" src="images/freefall.png" alt="The Scream" width="1536" height="1220">
-    <img id="bolt" src="images/bolt.png" alt="The Scream" width="1536" height="1220">
-    <img id="alerts" src="images/alerts.png" alt="The Scream" width="700" height="1000">
-    <img id="killer" src="images/killer.png" alt="The Scream" width="100" height="100">
-    <img id="hero" src="images/hero.png" alt="The Scream" width="100" height="100">
-    <img id="rescue" src="images/rescue.png" alt="The Scream" width="500" height="500">
+<body bgcolor="black"> 
 
-
-    <canvas id='c' style='position:absolute; left:0px; top:0px;'></canvas>
-
-    <script src="scripts/main.js"></script>
-
-    <script>
-    (function() {
-        var
-        // Obtain a reference to the canvas element using its id.
-        htmlCanvas = document.getElementById('c'),
-        // Obtain a graphics context on the canvas element for drawing.
-        context = htmlCanvas.getContext('2d');
-
-       // Start listening to resize events and draw canvas.
-       initialize();
-
-       function initialize() {
-           // Register an event listener to call the resizeCanvas() function
-           // each time the window is resized.
-           window.addEventListener('resize', resizeCanvas, false);
-           // Draw canvas border for the first time.
-           resizeCanvas();
-        }
-
-        // Display custom canvas. In this case it's a blue, 5 pixel
-        // border that resizes along with the browser window.
-        function redraw() {
-           context.strokeStyle = 'blue';
-           context.lineWidth = '5';
-           context.strokeRect(0, 0, window.innerWidth, window.innerHeight);
-        }
-
-        // Runs each time the DOM window resize event fires.
-        // Resets the canvas dimensions to match window,
-        // then draws the new borders accordingly.
-        function resizeCanvas() {
-            htmlCanvas.width = window.innerWidth;
-            htmlCanvas.height = window.innerHeight;
-            redraw();
-        }
-    })();
-
-    </script>
-
-
-</body>
 </html>

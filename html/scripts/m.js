@@ -9,7 +9,7 @@ var rightPressed = false;
 var upPressed = false;
 var downPressed = false;
 
-var g = 9.8;
+var g = 1;
 var ground = ybound;
 function Sprite(){
   this.x = xbound/2;
@@ -39,7 +39,7 @@ Sprite.prototype.update = function(){
   }
   this.x +=this.xvel;
   if(!(rightPressed ||leftPressed))this.xvel*=this.drag;
-  if((this.y+this.yvel)>ground){
+  if((this.y+this.height+this.yvel)>ground){
     this.y = ground-this.height;
     this.yvel=0;
   }
@@ -47,11 +47,12 @@ Sprite.prototype.update = function(){
     this.y +=this.yvel; //update y based on yvel
   }
   if(this.y+this.height<ground){
-    this.yvel +=g; //gravity
+    this.yvel+=g;
   }
-  if(upPressed){
-      this.yvel-=20;
+  if(upPressed&& this.y+this.height ==ground){
+      this.yvel-=15;
     }
+
 
   if(rightPressed){
     if (this.xvel<10)this.xvel +=1.3;
@@ -78,12 +79,40 @@ Sprite.prototype.render = function(){
 
 };
 
+
+function Missile(sprite){
+  this.x = 0;
+  this.y = 0;
+  this.speed = .5;
+  this.type = "red";
+  this.direction = Math.atan2(sprite.y-this.y, sprite.x-this.x);
+  this.update = function(sprite){
+    this.x += this.speed * Math.cos(this.direction);
+    this.y += this.speed * Math.sign(this.direction);
+    this.direction = Math.atan2(sprite.y-this.y, sprite.x-this.x);
+  };
+  this.render = function(){
+    var img = document.getElementById(this.type);
+    ctx.save();
+      ctx.translate( this.x+250, this.y+250 );
+      ctx.rotate(this.direction );
+      ctx.translate( -1*(this.x+250), -1*(this.y+250));
+      ctx.drawImage( img, 0, 0 );
+      ctx.restore();
+    //ctx.drawImage(img, this.x, this.y, 100, 100);
+  };
+};
+
 izzy = new Sprite();
+test = new Missile(izzy);
 function draw(){
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, xbound, ybound);
+
   izzy.render();
   izzy.update();
+  test.render();
+  test.update(izzy);
 
 
 
@@ -103,10 +132,10 @@ function keyDownHandler(e) {
     else if(e.key == "Left" || e.key == "ArrowLeft") {
         leftPressed = true;
     }
-    if(e.key ==38) {
+    if(e.key ==38||e.key == "ArrowUp") {
         upPressed = true;
     }
-    else if(e.key ==40) {
+    else if(e.key ==40||e.key == "ArrowDown") {
         downPressed = true;
     }
     else if(e.key == "a") {
@@ -125,10 +154,10 @@ function keyUpHandler(e) {
     else if(e.key == "Left" || e.key == "ArrowLeft") {
         leftPressed = false;
     }
-    if(e.key ==38) {
+    if(e.key ==38|| e.key == "ArrowUp") {
         upPressed = false;
     }
-    else if(e.key ==40) {
+    else if(e.key ==40 ||e.key == "ArrowDown") {
         downPressed = false;
     }
     else if(e.key == "a") {

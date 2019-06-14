@@ -83,24 +83,99 @@ Sprite.prototype.render = function(){
 function Missile(sprite){
   this.x = 0;
   this.y = 0;
-  this.speed = .5;
+  this.speed = 3;
   this.type = "red";
-  this.direction = Math.atan2(sprite.y-this.y, sprite.x-this.x);
+  this.direction = Math.atan2(sprite.y+50-this.y, sprite.x+50-this.x);
+  this.height = 100;
+  this.width =100;
+  this.splatter=[];
   this.update = function(sprite){
     this.x += this.speed * Math.cos(this.direction);
     this.y += this.speed * Math.sign(this.direction);
-    this.direction = Math.atan2(sprite.y-this.y, sprite.x-this.x);
+    this.direction = Math.atan2(sprite.y+50-this.y, sprite.x+50-this.x);
+    //if (collision(sprite,this))
   };
   this.render = function(){
     var img = document.getElementById(this.type);
+    this.displaySplatter;
     ctx.save();
-      ctx.translate( this.x+250, this.y+250 );
-      ctx.rotate(this.direction );
-      ctx.translate( -1*(this.x+250), -1*(this.y+250));
-      ctx.drawImage( img, 0, 0 );
-      ctx.restore();
-    //ctx.drawImage(img, this.x, this.y, 100, 100);
+    ctx.translate(this.x+90, this.y+20);
+    ctx.rotate(this.direction);
+    ctx.translate(-1*(this.x+50), -1*(this.y+50));
+    ctx.drawImage(img, this.x, this.y, 100, 100);
+    ctx.restore();
+
   };
+};
+Missile.prototype.explode = function(){
+  this.splatter =[];
+  var max_vel = 20;
+  var max_rad = this.height * 0.2;
+  for (var i = 0; i < getRandom(50, 100); i++) {
+    x = this.x + getRandom(-this.width, this.width);
+    y = this.y + getRandom(-this.height, this.height);
+    xvel  = max_vel * Math.sin(getRandom(-Math.PI, Math.PI));
+    yvel =  max_vel * Math.sin(getRandom(-Math.PI, Math.PI));
+    dir = Math.atan(yvel/xvel);
+    speed = Math.sqrt(yvel*yvel + xvel*xvel);
+
+    p = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad*2), 50, getRandom(0.85, 0.90), getRandom(0.97, 0.992), 'red');
+    //p = new Particle(0, 0, 0, 0, 0, 0, 0, 0, 0);
+    this.splatter.push(p);
+    //q = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.96, 0.99), getRandom(0.97, 0.992), '#ffffff');
+    // /this.splatter.push(q);
+    r = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.85, 0.90), getRandom(0.97, 0.992), 'orange');
+    this.splatter.push(r);
+    s = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.85, 0.90), getRandom(0.97, 0.992), 'yellow');
+    this.splatter.push(s);
+  }
+};
+function Particle(x, y, dir, speed, rad, min_rad, scale_speed, drag, fill) {
+	this.x = x;
+  this.y =y;
+  this.direction = 0;
+  this.speed = 3;
+  this.wander =1;
+  this.rad = rad;
+  this.scale = 1;
+  this.scale_speed = scale_speed;
+  this.drag = drag;
+  this.min_rad = min_rad;
+  this.fill = fill;
+  this.update = function(){
+    this.scale *= this.scale_speed;
+    this.speed *= this.drag;
+    this.x += this.speed * Math.cos(this.direction);
+    this.y += this.speed * Math.sign(this.direction);
+    this.direction += (Math.random() * 2 - 1) * this.wander;
+
+  };
+};
+Missile.prototype.displaySplatter = function() {
+  /*
+  ctx.beginPath();
+  ctx.arc(this.x, this.y,this.splatter.length, 0, Math.PI * 2);
+  ctx.fill();
+  */
+
+	ctx.globalCompositeOperation ='screen';
+
+	for (var i = 0; i < this.splatter.length; i++) {
+		var particle = this.splatter[i];
+
+		ctx.fillStyle = particle.fill;
+
+		ctx.beginPath();
+		ctx.arc(particle.x, particle.y, particle.rad * particle.scale, 0, Math.PI * 2);
+    //ctx.arc(this.x, this.y,5, 0, Math.PI * 2);
+		ctx.fill();
+    particle.update();
+    if(particle.rad*this.scale<30) this.splatter.splice(i, 1);
+
+	}
+	ctx.globalCompositeOperation = 'source-over';
+
+
 };
 
 izzy = new Sprite();

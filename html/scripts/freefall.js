@@ -31,7 +31,7 @@ function Carmen(){
   this.yvel = 0;
   this.sidestep = 0;
   this.frame =0;
-  this.drag = 0.9;
+  this.drag = .5;
   if (ybound<=720){
   this.res = ybound/720;
   }
@@ -100,6 +100,7 @@ function Carmen(){
     this.x +=this.xvel;
     }
     this.xvel *= this.drag;
+    //if(!(rightPressed||leftPressed)) this.xvel=0; //bit for olaf
     if (step>5){
       if (izzy.frame===2){
         izzy.frame=0;
@@ -117,12 +118,12 @@ function Carmen(){
     if(rightPressed && izzy.x+40 < 4*xbound/5&&!(rightPressed&&leftPressed)) {
       izzy.sidestep++;
       if (izzy.sidestep>4)izzy.sidestep=4;
-      izzy.xvel+=xbound/1280;
+      izzy.xvel+=xbound/350;
     }
     else if(leftPressed && izzy.x > xbound/5+2&&!(rightPressed&&leftPressed)) {
       izzy.sidestep--;
       if (izzy.sidestep<-4)izzy.sidestep=-4;
-      izzy.xvel -= xbound/1280;
+      izzy.xvel -= xbound/350;
     }
     else{
       if(izzy.sidestep>0) izzy.sidestep--;

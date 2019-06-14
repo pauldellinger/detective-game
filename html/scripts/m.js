@@ -11,6 +11,10 @@ var downPressed = false;
 
 var g = 1;
 var ground = ybound;
+function getRandom(min, max) {
+  return Math.random() * (max - min) + min;
+};
+//a = ge
 function Sprite(){
   this.x = xbound/2;
   this.y = ybound/2;
@@ -83,31 +87,39 @@ Sprite.prototype.render = function(){
 function Missile(sprite){
   this.x = 0;
   this.y = 0;
-  this.speed = 3;
+  this.speed = 10;
   this.type = "red";
-  this.direction = Math.atan2(sprite.y+50-this.y, sprite.x+50-this.x);
-  this.height = 100;
-  this.width =100;
+  this.direction = Math.atan2(sprite.y-this.y, sprite.x-this.x);
+  this.height = 25;
+  this.width =50;
   this.splatter=[];
   this.update = function(sprite){
     this.x += this.speed * Math.cos(this.direction);
     this.y += this.speed * Math.sign(this.direction);
-    this.direction = Math.atan2(sprite.y+50-this.y, sprite.x+50-this.x);
-    //if (collision(sprite,this))
+    this.direction = Math.atan2((sprite.y+20)-(this.y-this.height), (sprite.x)-(this.x-this.width));
+
+    if ((collision(sprite,this)||this.y>ybound)  &&!this.blown){
+      this.explode();
+
+
+    }
   };
   this.render = function(){
     var img = document.getElementById(this.type);
-    this.displaySplatter;
+    this.displaySplatter();
+    if (!this.blown){
     ctx.save();
-    ctx.translate(this.x+90, this.y+20);
+    ctx.translate(this.x+50, this.y+25);
     ctx.rotate(this.direction);
-    ctx.translate(-1*(this.x+50), -1*(this.y+50));
+    ctx.translate(-1*(this.x+50), -1*(this.y+25));
     ctx.drawImage(img, this.x, this.y, 100, 100);
     ctx.restore();
+  }
 
   };
 };
 Missile.prototype.explode = function(){
+  this.blown =true;
   this.splatter =[];
   var max_vel = 20;
   var max_rad = this.height * 0.2;
@@ -158,7 +170,7 @@ Missile.prototype.displaySplatter = function() {
   ctx.fill();
   */
 
-	ctx.globalCompositeOperation ='screen';
+	//ctx.globalCompositeOperation ='screen';
 
 	for (var i = 0; i < this.splatter.length; i++) {
 		var particle = this.splatter[i];
@@ -196,6 +208,14 @@ function draw(){
 }draw();
 //draw();
 
+function collision(sprite, missile){
+  if (sprite.x+20 < missile.x + missile.width/2 &&
+   sprite.x+20 + sprite.width/4> missile.x &&
+   sprite.y+20 < missile.y + missile.height/4 &&
+   sprite.y+20 + sprite.height*.8 > missile.y ){
+     return true;
+   }
+}
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);

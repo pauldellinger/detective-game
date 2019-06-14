@@ -85,34 +85,71 @@ Sprite.prototype.render = function(){
 
 
 function Missile(sprite){
-  this.x = 0;
+  this.x = getRandom(0, xbound);
   this.y = 0;
-  this.speed = 10;
+  this.speed = 5;
   this.type = "red";
   this.direction = Math.atan2(sprite.y-this.y, sprite.x-this.x);
   this.height = 25;
   this.width =50;
   this.splatter=[];
+  this.xvel =0;
+  this.yvel = 0;
+  this.turn = .5;
+  this.max = 10;
   this.update = function(sprite){
+    if(!this.blown){
+    dx=(sprite.x-50)- this.x;
+    dy=(sprite.y+50)-this.y;
+    distance = Math.sqrt(dx*dx+dy*dy); //get distance to target
+    dx/=distance;
+    dy/=distance; //baby vectors in the right proportion
+
+    this.xvel+=dx*this.turn; //multiply vector by turning speed
+    this.yvel+=dy*this.turn;
+
+    velocity=Math.sqrt((this.xvel*this.xvel)+(this.yvel*this.yvel)); //magnitude speed
+
+    if (velocity>this.max) //cap at max speed
+    {
+    	this.xvel=(this.xvel*this.max)/velocity;
+    	this.yvel=(this.yvel*this.max)/velocity;
+    }
+
+    this.direction = Math.atan2(this.yvel,this.xvel);
+    ctx.font = "16px Iceberg";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("direction: "+this.direction, xbound/2, 20);
+    this.x += this.xvel;
+    this.y +=this.yvel;
+
+    /*
     this.x += this.speed * Math.cos(this.direction);
     this.y += this.speed * Math.sign(this.direction);
     this.direction = Math.atan2((sprite.y+20)-(this.y-this.height), (sprite.x)-(this.x-this.width));
-
-    if ((collision(sprite,this)||this.y>ybound)  &&!this.blown){
+    */
+    if ((collision(sprite,this)||this.y-20>ybound)  &&!this.blown){
       this.explode();
+      test.push(new Missile(izzy));
 
-
+    }
     }
   };
   this.render = function(){
     var img = document.getElementById(this.type);
+    ctx.save();
+    ctx.translate(this.x+100, this.y+25);
+    ctx.rotate(this.direction);
+    ctx.translate(-1*(this.x+100), -1*(this.y+25));
     this.displaySplatter();
+    ctx.restore();
     if (!this.blown){
     ctx.save();
-    ctx.translate(this.x+50, this.y+25);
+    ctx.translate(this.x+100, this.y+25);
     ctx.rotate(this.direction);
-    ctx.translate(-1*(this.x+50), -1*(this.y+25));
+    ctx.translate(-1*(this.x+100), -1*(this.y+25));
     ctx.drawImage(img, this.x, this.y, 100, 100);
+    this.displaySplatter();
     ctx.restore();
   }
 
@@ -121,8 +158,8 @@ function Missile(sprite){
 Missile.prototype.explode = function(){
   this.blown =true;
   this.splatter =[];
-  var max_vel = 20;
-  var max_rad = this.height * 0.2;
+  var max_vel = 10;
+  var max_rad = this.height * 0.3;
   for (var i = 0; i < getRandom(50, 100); i++) {
     x = this.x + getRandom(-this.width, this.width);
     y = this.y + getRandom(-this.height, this.height);
@@ -131,23 +168,23 @@ Missile.prototype.explode = function(){
     dir = Math.atan(yvel/xvel);
     speed = Math.sqrt(yvel*yvel + xvel*xvel);
 
-    p = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad*2), 50, getRandom(0.85, 0.90), getRandom(0.97, 0.992), 'red');
+    p = new Particle(x, y, getRandom(-Math.PI,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad*2), 50, getRandom(0.85, 0.95), getRandom(0.97, 0.992), 'red');
     //p = new Particle(0, 0, 0, 0, 0, 0, 0, 0, 0);
     this.splatter.push(p);
     //q = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.96, 0.99), getRandom(0.97, 0.992), '#ffffff');
     // /this.splatter.push(q);
-    r = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.85, 0.90), getRandom(0.97, 0.992), 'orange');
+    r = new Particle(x, y, getRandom(-Math.PI,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.85, 0.95), getRandom(0.97, 0.992), 'orange');
     this.splatter.push(r);
-    s = new Particle(x, y, getRandom(0,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.85, 0.90), getRandom(0.97, 0.992), 'yellow');
+    s = new Particle(x, y, getRandom(-Math.PI,Math.PI), getRandom(-max_vel, max_vel), getRandom(5, max_rad), 50, getRandom(0.85, 0.95), getRandom(0.97, 0.992), 'yellow');
     this.splatter.push(s);
   }
 };
 function Particle(x, y, dir, speed, rad, min_rad, scale_speed, drag, fill) {
 	this.x = x;
   this.y =y;
-  this.direction = 0;
-  this.speed = 3;
-  this.wander =1;
+  this.direction =dir;
+  this.speed = speed;
+  this.wander =.1;
   this.rad = rad;
   this.scale = 1;
   this.scale_speed = scale_speed;
@@ -182,7 +219,7 @@ Missile.prototype.displaySplatter = function() {
     //ctx.arc(this.x, this.y,5, 0, Math.PI * 2);
 		ctx.fill();
     particle.update();
-    if(particle.rad*this.scale<30) this.splatter.splice(i, 1);
+    if(particle.rad*this.scale<20) this.splatter.splice(i, 1);
 
 	}
 	ctx.globalCompositeOperation = 'source-over';
@@ -191,15 +228,23 @@ Missile.prototype.displaySplatter = function() {
 };
 
 izzy = new Sprite();
-test = new Missile(izzy);
+test = [];
+i=2;
+while (i--){
+  test.push(new Missile(izzy));
+}
+
 function draw(){
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, xbound, ybound);
 
   izzy.render();
   izzy.update();
-  test.render();
-  test.update(izzy);
+  for (i=0; i<test.length;i++){
+    test[i].render();
+    test[i].update(izzy);
+  }
+
 
 
 
@@ -209,10 +254,10 @@ function draw(){
 //draw();
 
 function collision(sprite, missile){
-  if (sprite.x+20 < missile.x + missile.width/2 &&
-   sprite.x+20 + sprite.width/4> missile.x &&
-   sprite.y+20 < missile.y + missile.height/4 &&
-   sprite.y+20 + sprite.height*.8 > missile.y ){
+  if (sprite.x+50 < missile.x + missile.width &&
+   sprite.x + sprite.width> missile.x &&
+   sprite.y+80 < missile.y + missile.height &&
+   sprite.y + sprite.height > missile.y ){
      return true;
    }
 }

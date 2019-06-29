@@ -197,6 +197,7 @@ function Particle(x, y, dir, speed, rad, min_rad, scale_speed, drag, fill) {
     this.y += this.speed * Math.sign(this.direction);
     this.direction += (Math.random() * 2 - 1) * this.wander;
 
+
   };
 };
 Missile.prototype.displaySplatter = function() {
@@ -218,7 +219,7 @@ Missile.prototype.displaySplatter = function() {
     //ctx.arc(this.x, this.y,5, 0, Math.PI * 2);
 		ctx.fill();
     particle.update();
-    if(particle.rad*this.scale<20){
+    if((particle.rad*particle.scale)<.001){
       this.splatter.splice(i, 1);
       count ++;
     }
@@ -233,7 +234,7 @@ Missile.prototype.displaySplatter = function() {
 izzy = new Sprite();
 test = [];
 
-i=2;
+i=10;
 while (i--){
   test.push(new Missile(izzy));
 }
@@ -253,7 +254,8 @@ function draw(){
 
     ctx.font = "16px Iceberg";
     ctx.fillStyle = "#0095DD";
-    ctx.fillText("#of particles removed: "+count, xbound/2, 20);
+    ctx.fillText("missiles active: "+test.length, xbound/2, 20);
+    ctx.fillText("particles removed: "+count, xbound/3, 20);
   }
 
 

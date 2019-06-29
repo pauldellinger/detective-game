@@ -2,6 +2,7 @@ var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 var xbound = window.innerWidth;
 var ybound = window.innerHeight;
+var count = 0;
 ctx.fillStyle = "white";
 ctx.fillRect(0, 0, xbound, ybound);
 var leftPressed = false;
@@ -117,9 +118,7 @@ function Missile(sprite){
     }
 
     this.direction = Math.atan2(this.yvel,this.xvel);
-    ctx.font = "16px Iceberg";
-    ctx.fillStyle = "#0095DD";
-    ctx.fillText("direction: "+this.direction, xbound/2, 20);
+
     this.x += this.xvel;
     this.y +=this.yvel;
 
@@ -184,7 +183,7 @@ function Particle(x, y, dir, speed, rad, min_rad, scale_speed, drag, fill) {
   this.y =y;
   this.direction =dir;
   this.speed = speed;
-  this.wander =.1;
+  this.wander =.5;
   this.rad = rad;
   this.scale = 1;
   this.scale_speed = scale_speed;
@@ -219,9 +218,13 @@ Missile.prototype.displaySplatter = function() {
     //ctx.arc(this.x, this.y,5, 0, Math.PI * 2);
 		ctx.fill();
     particle.update();
-    if(particle.rad*this.scale<20) this.splatter.splice(i, 1);
+    if(particle.rad*this.scale<20){
+      this.splatter.splice(i, 1);
+      count ++;
+    }
 
 	}
+
 	ctx.globalCompositeOperation = 'source-over';
 
 
@@ -229,6 +232,7 @@ Missile.prototype.displaySplatter = function() {
 
 izzy = new Sprite();
 test = [];
+
 i=2;
 while (i--){
   test.push(new Missile(izzy));
@@ -243,6 +247,13 @@ function draw(){
   for (i=0; i<test.length;i++){
     test[i].render();
     test[i].update(izzy);
+    if (test[i].splatter.length ==1){
+      test.splice(i,1);
+    }
+
+    ctx.font = "16px Iceberg";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("#of particles removed: "+count, xbound/2, 20);
   }
 
 

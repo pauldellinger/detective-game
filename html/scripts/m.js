@@ -234,7 +234,7 @@ Missile.prototype.displaySplatter = function() {
 izzy = new Sprite();
 test = [];
 
-i=10;
+i=1;
 while (i--){
   test.push(new Missile(izzy));
 }
@@ -255,7 +255,7 @@ function draw(){
     ctx.font = "16px Iceberg";
     ctx.fillStyle = "#0095DD";
     ctx.fillText("missiles active: "+test.length, xbound/2, 20);
-    ctx.fillText("particles removed: "+count, xbound/3, 20);
+    ctx.fillText("particles removed: "+izzy.x, xbound/3, 20);
   }
 
 

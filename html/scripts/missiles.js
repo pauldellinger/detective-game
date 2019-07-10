@@ -12,13 +12,26 @@ var upPressed = false;
 var downPressed = false;
 
 var g = 1;
-var ground = ybound;
+var ground = ybound-105;
 function getRandom(min, max) {
   return Math.random() * (max - min) + min;
 };
 //a = ge
+
+function Camera(){
+  this.x =0;
+  this.vel =0;
+  this.update = function(){
+    this.x +=this.vel;
+    this.vel *=.95;
+  };
+
+
+};
+
 function Sprite(){
   this.x = xbound/2;
+  this.trueX = xbound/2;
   this.y = ybound/2;
   this.width = 100;
   this.height = 100;
@@ -43,7 +56,26 @@ Sprite.prototype.update = function(){
     }
     if (Math.round(100*this.xvel)/100 ==0)this.frame = 3;
   }
+
+  if ((this.x+this.xvel)<(4*xbound/5) && ((this.x+this.xvel)>xbound/5)){
   this.x +=this.xvel;
+  }
+  else{
+    if (Math.abs(playCam.vel)<Math.abs(this.xvel)){
+      playCam.vel += this.xvel*.05;
+      for (i=0; i<missiles.length;i++){
+        missiles[i].x -= this.xvel;
+      }
+      for (i=0; i<layers.length;i++){
+        layers[i].x += this.xvel;
+      }
+
+    }
+
+  }
+  this.trueX +=this.xvel;
+
+
   if(!(rightPressed ||leftPressed))this.xvel*=this.drag;
   if((this.y+this.height+this.yvel)>ground){
     this.y = ground-this.height;
@@ -130,7 +162,7 @@ function Missile(sprite){
     */
     if ((collision(sprite,this)||this.y-20>ground)  &&!this.blown){
       this.explode();
-      test.push(new Missile(izzy));
+      missiles.push(new Missile(izzy));
 
     }
     }
@@ -237,46 +269,63 @@ function Background(layer, sprite){
   this.x = 0;
   this.img = "layer"+layer;
   this.update = function(){
-    this.x = sprite.x;
+    //this.x = sprite.x;
   };
   this.render = function(){
     var img = document.getElementById(this.img);
-    ctx.drawImage(img, this.x/(15/this.layer),0, 1280 ,720, 0,0, 1280, 720);
+    ctx.drawImage(img, this.x/(50/this.layer),0, xbound ,ybound, 0,0, xbound, ybound);
+
   };
 }
 
-
+var playCam = new Camera();
 izzy = new Sprite();
-test = [];
-
+missiles = [];
+layers=[];
 i=1;
 while (i--){
-  test.push(new Missile(izzy));
+  missiles.push(new Missile(izzy));
 }
+
 layer1 = new Background(1, izzy);
 layer2 = new Background(2, izzy);
+floor = new Background(50, izzy);
+layers.push(layer1);
+layers.push(layer2);
+layers.push(floor);
 function draw(){
-  ctx.fillStyle = "white";
-  //ctx.fillRect(0, 0, xbound, ybound);
-  ground = window.innerHeight;
 
-  layer1.update();
-  layer1.render();
-  //layer2.update();
-  //layer2.render();
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, xbound, ybound);
+  //ground = window.innerHeight;
+
+  for(i=0; i<layers.length;i++){
+    layer=layers[i];
+    layer.update();
+    layer.render();
+
+
+  }
+  playCam.update();
   izzy.render();
   izzy.update();
-  for (i=0; i<test.length;i++){
-    test[i].render();
-    test[i].update(izzy);
-    if (test[i].splatter.length ==1){
-      test.splice(i,1);
+  for (i=0; i<missiles.length;i++){
+    missiles[i].render();
+    missiles[i].update(izzy);
+    if (missiles[i].splatter.length ==1){
+      missiles.splice(i,1);
     }
 
     ctx.font = "16px Iceberg";
     ctx.fillStyle = "#0095DD";
-    ctx.fillText("missiles active: "+test.length, xbound/2, 20);
+    ctx.fillText("missiles active: "+missiles.length, xbound/2, 20);
     ctx.fillText("particles removed: "+ground, xbound/3, 20);
+    ctx.fillText("xbound: "+xbound, xbound/3, 40);
+    ctx.fillText("ybound: "+ybound, xbound/3, 60);
+    ctx.fillText("trueX: "+izzy.trueX, xbound/3, 80);
+    ctx.fillText("izzy.xvel: "+izzy.xvel, xbound/2, 80);
+    ctx.fillText("cameraX: "+playCam.x, xbound/3, 100);
+    ctx.fillText("cameravel: "+playCam.vel, xbound/3, 120);
   }
 
 
@@ -346,7 +395,7 @@ function keyUpHandler(e) {
 function reportWindowSize() {
   ybound = window.innerHeight;
   xbound = window.innerWidth;
-  ground = window.innerHeight;
+  ground = window.innerHeight-105;
   izzy.y = ground;
   if (window.innerWidth/window.innerHeight === 16/9){
     resizeScale = 1080/ window.innerHeight;

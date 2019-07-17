@@ -11,12 +11,32 @@ var rightPressed = false;
 var upPressed = false;
 var downPressed = false;
 
+var obstacles;
+fetch('levels/test.txt')
+  .then(response => response.text())
+  .then((data) => {
+    addObstalces(data);
+    //obstacles =  data.split("\n");
+    console.log(data);
+  });
+
 var g = 1;
 var ground = ybound-105;
 function getRandom(min, max) {
   return Math.random() * (max - min) + min;
 };
 //a = ge
+
+function addObstacles(data){
+  data = data.split("\n");
+
+}
+function Obstacle(x,y,x2,y2){
+  this.x = x;
+  this.y = y;
+  this.x2 = x2;
+  this.y2=y2;
+}
 
 function Camera(){
   this.x =0;
@@ -131,6 +151,7 @@ function Missile(sprite){
   this.yvel = 0;
   this.turn = .5;
   this.max = 10;
+
   this.update = function(sprite){
     if(!this.blown){
     dx=(sprite.x-50)- this.x;
